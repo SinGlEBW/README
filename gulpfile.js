@@ -161,6 +161,7 @@ let reactJSX = async function(file){//для работы import в React
     arrFullPath.map((items) => {
 
       return (
+        // файлы нужно не перебирать. Закинуть массив можно
         browserify(items).transform( babelify, {
             presets: ['@babel/preset-react','@babel/preset-env'],//
             plugins: [

@@ -1,6 +1,11 @@
 /*
+  Задача пакета проследить изменения и передать их в файл. Файл будет изменён, но браузер-то не отреагирует,
+  для этого нужен browser-sync
 
-   npm i babelify @babel/core @babel/preset-env babel-preset-minify -D //минимум для browserify
+  npm i babelify @babel/core @babel/preset-env babel-preset-minify -D //минимум для browserify
+
+  Что бы не писать в cli команду: babel app/js -d app/dist --presets env -w  Ниже настройка через API
+  -w это watch - слежка. 
 
    babel-preset-minify чуть хуже uglify-js по тестам. Мои тесты.
     Какой-то кусок кода: babel-preset-minify - 5.11кб, uglify-js - 4.63кб.   

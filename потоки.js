@@ -6,6 +6,11 @@
 */
 let readStream = fs.createReadStream(путь_к_файлу); // создаёт прочтение потока
 
+let readableStream = fs.createReadStream("hello.txt", "utf8");
+let writeableStream = fs.createWriteStream("some2.txt");
+ 
+readableStream.pipe(writeableStream);//проток чтения будет прочитан и передан в поток записи который передан через pipe
+
 readStream.on("open", function () {
   readStream.pipe(res); //т.к. res это поток, а pipe работает с данными Stream то передаёт поток в поток объекта ответа
 });
@@ -37,4 +42,4 @@ class myReadable2 extends Readable {
   }
 }
 opt // принимает параметры
-let read = new myReadable2({highWaterMark })//highWaterMark — это максимальное количество.по умолчанию 16кб
+let read = new myReadable2({ highWaterMark })//highWaterMark — это максимальное количество.по умолчанию 16кб
