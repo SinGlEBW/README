@@ -29,6 +29,7 @@
 	/**/
 }
 
+
 div{
 	/*сокращённая запись. При желании сокр.запись может принимать через запятую дополнительный keyframes*/
 	animation: nameAn duration timing-function delay iteration-count direction fill-mode;
