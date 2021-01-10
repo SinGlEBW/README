@@ -258,6 +258,10 @@ Object.defineProperty(obj, 'name1', {
  Object.keys({key: 'values'}) //получить все ключи и вернуть итератор
  Object.getOwnPropertyNames({key: 'values'})//тоже самое что и keys
 
+  let obj = {name: 'вася', age: 16};
+  //не уверен, но вроде in работает в цикле for in
+  if('name' in obg){} // оператор in в данном случае вернёт bool если есть ключ
+  obj.hasOwnProperty('name');// так же вернёт bool если есть ключ
 
 
  /*

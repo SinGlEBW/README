@@ -1,0 +1,57 @@
+
+	<!-- БЫЛО -->
+<div class="header__top">
+  <div class="logo">
+    <object class="logo__icon" >Лого</object>
+	</div>
+	<a class="header__phone">88003000500</a>
+  <div class="header__social">
+		<a class="header__social-link" href="#">
+			<span class="header__social-name header__social-name--whatsapp">WhatsApp</span>
+			<object class="header__social-icon" >WhatsApp</object>
+		</a>
+		<a class="header__social-link" href="#">
+			<span class="header__social-name header__social-name--instagram">Instagram</span>
+			<object class="header__social-icon" >Instagram</object>
+		</a>
+  </div>
+</div>
+
+<!-- СТАЛО -->
+<div class="header__top">
+	<object class="logo">Лого</object>
+	<a class="header__phone">88003000500</a>
+
+	<a class="header__social-link sLink1" href="#">
+		<span class="header__social-name header__social-name--whatsapp">WhatsApp</span>
+		<object class="header__social-icon">WhatsApp</object>
+	</a>
+	<a class="header__social-link sLink2" href="#">
+		<span class="header__social-name header__social-name--instagram">Instagram</span>
+		<object class="header__social-icon">Instagram</object>
+	</a>
+
+</div>
+<!-- 
+	Т.к Ссылки сами по себе, стоит задача выровнять их относительно друг друга. 
+	Достаточно в родителе указать
+	  grid-auto-flow: column; /* перенести элементы в колонки*/
+  	justify-content: end; /* прибить весь контент к левой стороне*/
+  	align-items: center; /* выровнять контент в ячейках по вертикали*/
+		ну и текст отодвинуть
+
+	Всё это замечательно и работает если размер элементов задан непосредственно у себя, если
+	не задан например svg то его раздует, что бы задать понадобиться grid-template-columns и придётся
+	обоим ссылкам назначать свой набор grid свойств
+
+
+	Насколько бы повлиял отсутствующий блок? Сейчас что бы выравнивать эти 2 элемента нужно обоим задавать 
+	или grid или flex.
+	Будь wrap выравнивали бы только ссылки, но не элементы.
+ -->
+
+
+
+
+
+
