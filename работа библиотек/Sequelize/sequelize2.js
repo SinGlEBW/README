@@ -1,33 +1,27 @@
-/*eslint-disable*/
 const { Sequelize, DataTypes, BelongsTo, Op, Model, QueryTypes } = require("sequelize");
-const Sequelize1 = require("sequelize");
 
-/*
-  sequelize большой класс который вмещает в себя большое кол-во
-  свойств и методов. Передав подключение, создаём экземпляр на котором имеем методы обращения к базе
-*/
+/* Sequelize большой класс который вмещает в себя большое кол-во свойств и методов. 
+   Передав подключение, создаём экземпляр на котором имеем методы обращения к базе. */
+
+
 let sequelize = new Sequelize("database", "username", "password", {});
 
-("#####------<{ Не обработанные запросы }>------#####");
+/*-------------------------------------------------------------------------------------------------
+#######---------<{ Не обработанные запросы  }>---------#######*/
+// Возвращает Promise
+sequelize.query("", option); //SQL запрос. 
+sequelize.query("", { type: QueryTypes.SELECT }); //SQL запрос. можно убрать metadata и получить чистый объект
 
-let [data, metadata] = sequelize.query(""); //SQL запрос. 2й параметр что бы убрать и metadata и получить чистый объект данных
-let data1 = sequelize.query("", { type: QueryTypes.SELECT }); //SQL запрос. 2й параметр что бы убрать и metadata и получить чистый объект данных
-sequelize.query("SELECT role AS 'baz.vaz.gaz' FROM users", { option });
-//Что то было на php называлось Плейсхолдеры (защита от SQL инъекций). Данные экранируются перед отправкой
-sequelize.query("SELECT role, phone FROM users WHERE role = ? AND phone= ? ", {
-  option,
-}); //работаем с заменой
-sequelize.query(
-  "SELECT role, login FROM users WHERE role = :admin AND login LIKE :log",
-  { option }
-); //для LIKE = не нужно
+sequelize.query("SELECT role AS 'baz.vaz.gaz' FROM users");
+/*
+  Что то было на php называлось Плейсхолдеры (защита от SQL инъекций). Данные экранируются перед отправкой, в option
+  данные передаются в replacements
+*/
+sequelize.query("SELECT role, phone FROM users WHERE role = ? AND phone= ?"); //работаем с заменой
+sequelize.query("SELECT role, login FROM users WHERE role = :admin AND login LIKE :log"); //для LIKE = не нужно
+sequelize.query("SELECT role, phone FROM users WHERE phone = $tel AND role = $1"); //работаем с привязкой
 
-sequelize.query(
-  "SELECT role, phone FROM users WHERE phone = $tel AND role = $1 ",
-  { option }
-); //работаем с привязкой
-//для sequelize.query
-option = {
+option = {//для sequelize.query
   model: объект_модели, //можно передать модель вместо type: QueryTypes.SELECT
   raw: true,
   logging: console.log("Запрос пришёл"), //будет выполняться всякий раз перед тем как показать данные
@@ -59,8 +53,9 @@ let Объект_QueryTypes = {
   SHOWCONSTRAINTS: "SHOWCONSTRAINTS",
 };
 
-"#####------<{ Ассоциации }>------#####";
-/*
+/*-------------------------------------------------------------------------------------------------
+#######---------<{ Ассоциации  }>---------#######
+
   Ассоциации нужны для связи моделей между собой при обращении в БД
   Поддержка ассоциаций:
   One-To-One (один к одному), (1 объект из одной таблицы ссылается на 1 объект другой таблицы)
@@ -246,7 +241,7 @@ User.findOne({ include: Phone });//как я говорил. не сработа
 "#####------<{ Параноик }>------#####";
 /*
   Режим таблицы paranoid: true нужен для того что бы была возможность удалять не
-  жётским способом сразу и навсегда, а предварительно при вызове destroy() указывать
+  жёстким способом сразу и навсегда, а предварительно при вызове destroy() указывать
   записи метку времени удаления в колонке deletedAt. Доступ к записи в таком случае прекращается, 
   будет null, но сама запись остаётся в бд. Повторное обращение data.destroy() приводит к ошибке
   Если предварительно пред удалением поставить force: true запись будет удалена навсегда.

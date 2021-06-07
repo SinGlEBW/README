@@ -8,6 +8,7 @@ npm install || npm i
 npm uninstall || npm r
 npm config || npm c
 npm update || npm up
+npm rebuild   пересобирает зависимости вроде как. Требуеться когда обновляеться NodeJS
 
 npm dedupe - указывает библиотекам что нужно ссылаться на последнюю версию зависимости
 npm outdated - проверят есть ли устаревшие  версии пакетов
