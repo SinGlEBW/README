@@ -582,11 +582,37 @@ p:first-child {}
 
 
 .myClass:not(:first-child) {/*всех кроме 1 элемента*/
-
-display: flow-root;
-	
-
+	display: flow-root;
 }
+
+
+/* Пример на реальном проекте в React:
+<body class="theme-light" >
+	... где-то там есть кнопки
+		  <Button onClick={toggleDarkMode} className="header-icon-4 show-on-theme-light"><i className="fa-moon"></i></Button>    
+    	<Button onClick={toggleDarkMode} className="header-icon-4 show-on-theme-dark"><i className="fa-sun"></i></Button>   
+</body>
+*/
+/*При изменении всего лишь одного класса на body мы получаем как бы условие: 
+	"Если в структуре DOM встречается такая цепочка, то к последнему применить данные свойства"
+	То есть прячем одну кнопку и показываем другую, при изменении класса на body в theme-dark 
+	получаем другие связки 
+*/
+.theme-light .show-on-theme-light{/*начальный класс в body theme-light*/
+	display: block;
+}
+.theme-light .show-on-theme-dark{
+	display: none;
+}
+.theme-dark .show-on-theme-dark{/*по клику изменим body в theme-dark и классы на кнопках отработают*/
+	display: block;
+}
+.theme-dark .show-on-theme-light{
+	display: none;
+}
+
+
+
 /*--------------------------------------------------------------------------------*/
 select {
 	padding: 0 10px;

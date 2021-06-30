@@ -217,22 +217,58 @@ $values: #ff0000, #00ff00, #0000ff;
 
 .block{
   $rand: random(24);// выдаст число в диапазоне до 24 
+  //есть простая форма if
+  background-color: if($isCheck, orange, teal);
+  //и более сложная
+  @if($a > 2){}
+  @else{} //так же можно продолжить @else if(){}
+
+  @debug $value;  //тот же console.log. можно написать так  @debug "ширина = #{$value}"  аналог в JS console.log(`ширина ${value}`)
+
+ 
+$list: 10px, 20px, 30px, 40px;
+/* 
+  Цикл просто присваивает в $i числа с 1 до 3х, а мы дальше думаем что сделать
+  с итератором. Что бы итерация продолжалась включительно до 4х,
+  то вместо "to" указать "through"
+*/
+  @for $i from 1 to 4 {} 
+  @for $i from 1 through 4 {} 
+  @for $i from 1 through length($list) {} 
+ 
+    
+  $colors: orange, red, hotpink, seagreen;
+/* цикл each аналог в JS for in.  */
+  .btn {
+    min-width: 120px;
+    @each $color in $colors {
+      &-#{$color} {
+        background-color: $color
+      }
+    }
+  }
   
-  @if($a > 2){
-
+/*
+  Создали несколько классов 
+  .btn{
+    min-width: 120px;
   }
-  @else{
-
+  .btn-orange{
+    background-color: orange;
   }
+  ...
+*/
+// Так же можно перечислять многомерные массивы
 
-// Числа от 10 до 19 будут присваиваться в $b
-  @for $b from 10 to 20 {
-    
-  }
+$colorPack: (
+  "green" #A0D468 #8CC152 rgba(140, 193, 82, 0.3) rgba(140, 193, 82, 0.7), 
+  "grass" #34cc73 #2ABA66 rgba(140, 193, 82, 0.3) rgba(140, 193, 82, 0.7)
+);
 
-  @each $var in list {
-    
-  }
+.wrap{
+  @each $var, $color1, $color2, $color3, $color4 in $colorPack {}
+}
+ 
 }
 
 
