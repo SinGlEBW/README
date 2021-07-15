@@ -311,6 +311,17 @@ componentDidUpdate(prevProps, prevState);/* обновляется после re
                                             не даст бесконечно перерисовывать компонент */
 componentWillUnmount()//отрабатывает когда с компонента ушли
 
+
+shouldComponentUpdate (nextProp, nextState){  /* метод будет обновлять данный контейнер только в том случае если 
+                                                 если условие истинно. Нужно это для того что бы реакт не обновлял 
+                                                 если данные этого компонента не изменились. тот же useMemo или ReactMemo. 
+                                                 Если данный контейнер обновляется то и компоненты в нём обновляются. 
+                                                 Для ниж так же можно установить memo.*/
+  console.dir(nextProp !== this.props);                          
+  return nextProp !== this.props 
+}
+class myComponent extends PureComponent {} //уже несут данный конфиг shouldComponentUpdate
+
 /* ВАЖНО: В react нельзя обращаться напрямую к DOM через подобные обращения: document.querySelector и т.д. потому что он может не успеть отрисоватся.
           для этого есть createRef, но всё равно им не рекомендуется пользоваться.  */
 

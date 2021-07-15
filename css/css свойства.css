@@ -543,9 +543,18 @@ p ~ span выберет все элементы span, расположенные
 	Иногда это надо что бы перебить свойства
 */
 
-.slider__btn.slider__btn--left {}
+.slider_pages__item.is_active{} /*эти свойства в is_active отработают если 2 класса на одном элементе
 
-.wrap .slider__btn--left {}
+	<div class='slider_pages__item is_active' ></div>*/
+
+.slider_pages__wrapper .is_active{} /* is_active отработает если в дереве html будет вложенность
+
+		<div class='slider_pages__wrapper' >
+				И рядом или где-то там 
+				<div class='is_active'> </div>
+
+		</div>
+*/
 
 /*в отличии от обращение от родителя к дочернему*/
 

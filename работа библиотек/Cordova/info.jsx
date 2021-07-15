@@ -46,6 +46,18 @@ cordova build android - конкретный build
 
 */
 
+/*------------------------------------------------------------------------------------------------
+#########--------<{ Команды cordova }>--------##########
+cordova platform update <platform@version>    обновление
+cordova platform remove || rm <platform>   удаление платформы
+
+
+
+cordova plugin [add || rm] имя_плагина
+
+cordova info  - выводит в консоль информацию о сборках, версиях и config.xml
+*/
+
 
 
 
