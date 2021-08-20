@@ -322,6 +322,10 @@ shouldComponentUpdate (nextProp, nextState){  /* метод будет обно�
 }
 class myComponent extends PureComponent {} //уже несут данный конфиг shouldComponentUpdate
 
+
+/*----------------------------------------------------------------------------------------------------
+#######-------<{ О ref }>-------####### */
+
 /* ВАЖНО: В react нельзя обращаться напрямую к DOM через подобные обращения: document.querySelector и т.д. потому что он может не успеть отрисоватся.
           для этого есть createRef, но всё равно им не рекомендуется пользоваться.  */
 
@@ -338,6 +342,129 @@ React.createRef();/*react привязывает ссылку напрямую �
       )
     }
 
+    
+/*
+  Есть ещё такой метод React.forwardRef(). Обычно мы передаём ref компоненту через свой props так:
+*/
+    
+const ChildComponent = (props) => {
+	
+  return  <button onClick={(e)=>{ //что-то тут делаем с props.refBox   }}>Клик</button>
+}
+
+
+const ParentComponent = (props) => {
+  let ref = useRef();
+  return (
+    <>
+      <div className="box" ref={ref}>Блок 1</div>
+      <ChildComponent refBox={ref} />
+    </>
+  )
+}
+  
+    
+    
+
+    
+    
+ //неправильно
+ class ChildComponent extends Component {
+
+  render() {
+    return (
+      <>
+        <button ref={this.state.ref}> </button>
+        <Component ref={this.state.ref} refButton={this.state.ref} />
+        {/* ref так не будет работать в другом компоненте, не важно передаём через зарезервированный ref или обычным props */}
+      </>
+    )
+  }
+  
+    
+class ParentComponent extends Component {
+  state = {
+    refBtn: React.createRef()
+  }
+
+  render() {
+    return (
+      <>
+        <button ref={this.state.ref}> </button>
+        <ChildComponent ref={this.state.refBtn} refButton={this.state.refBtn} />
+        {/* ref не будет работать в ChildComponent компоненте, не важно передаём через зарезервированный ref или обычным props. 
+	 В другом компоненте. В случае классовой компоненты в ChildComponent  увидим null, в функциональной undefined */}
+      </>
+    )
+  }
+}
+
+
+
+//правильно
+
+const ChildComponent = (props, ref) => {
+
+return (
+  <>
+    <button ref={this.state.ref}> </button>
+    <Component ref={this.state.ref} refButton={this.state.ref} />
+    {/* ref так не будет работать в другом компоненте, не важно передаём через зарезервированный ref или обычным props */}
+  </>
+ )
+}
+
+
+
+class ParentComponent extends Component {
+  state = {
+    ref: React.createRef();
+  }
+
+  render() {
+    return (
+      <>
+        <button ref={this.state.ref}> </button>
+        <ChildComponent ref={this.state.ref} />
+        {/* ref так не будет работать в другом компоненте, не важно передаём через зарезервированный ref или обычным props */}
+      </>
+    )
+  }
+}
+    
+
+//С функциональной компонентой это выглядит так:
+
+const ChildComponent = React.forwardRef((props, ref) => {//ref появиться 2м парраметром
+ 
+  console.dir(ref);
+  return (
+    <button className="FancyButton">
+      {props.children}
+    </button>
+  )
+});
+
+
+const ParentComponent = (props) => {
+  let ref = useRef();
+
+  return (
+    <div className="box" ref={ref}>
+      <ChildComponent ref={ref} props1={2}>Click me!</ChildComponent>
+    </div>
+  )
+};
+    
+
+
+
+
+
+
+/*----------------------------------------------------------------------------------------------------
+#######-------<{ this.setState }>-------####### */
+    
 this.setState({})
 this.setState((prevState, props) => ({count: prevState.count + props.count})); // требуется если нужно динамически использовать предыдущее значение
 
