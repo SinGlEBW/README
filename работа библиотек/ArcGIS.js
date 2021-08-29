@@ -7,10 +7,15 @@
     import WebTileLayer from '@arcgis/core/layers/WebTileLayer';
     import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
 
-/*или установить пакет ersi-loader это обёртка над @arcgis. Подключение пакетов выглядит иначе и имеет приписку esri.*/
+/*или установить пакет esri-loader это обёртка над @arcgis. Подключение пакетов выглядит иначе и имеет приписку esri.*/
 
-import { loadModules } from 'ersi-loader'; 
+import { loadModules, loadCss } from 'esri-loader'; 
  // подключение происходит асинхронно.
+ /*
+  loadCss нужен если требуется определённую версию скачать css или с сервера
+  loadCss('3.37')
+  loadCss('http://server/path/to/esri/css/main.css'); Обычно хватает указать параметра в loadModules
+ */
   loadModules(
     [
     "esri/Map",
@@ -30,7 +35,8 @@ import { loadModules } from 'ersi-loader';
     "esri/Graphic",
     "esri/layers/GraphicsLayer",
     "esri/layers/WebTileLayer",
-    ],
+    ], {css: true})
+    .then(() => 
     ([
       eMap, eCfg,
       eMapView, eSceneView,
@@ -76,13 +82,16 @@ import { loadModules } from 'ersi-loader';
         container: "viewDiv" 
       });
 
-    /*-------------------------------------------------------------------------------------------------------------
-    #######-------<{ Добавление виджетов на карту }>---------###########
-      Например переключение на гибрид.
-      Виджеты добавляются на поверхность отображённой карты. 
-      (далее будут фигуры на карте, они закладываются предварительно в карту, и карта закидывается в 2d-3d отображение) 
-      
-    */
+
+/*------------------------------------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------------------------
+#######-------<{ Добавление виджетов на карту }>---------###########
+
+  Например переключение на гибрид.
+  Виджеты добавляются на поверхность отображённой карты. 
+  (далее будут фигуры на карте, они закладываются предварительно в карту, и карта закидывается в 2d-3d отображение) 
+  
+*/
 
     const basemapToggle = new eBasemapToggle({//мини виджет миникарт: гибрид, топография
       view: view, //добавляем карту 2d или 3d карту
@@ -103,13 +112,14 @@ import { loadModules } from 'ersi-loader';
     
     view.ui.add(BasemapGallery, 'top-right')//указываем, какой виджет добавить и куда
 
+/*------------------------------------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------------------------
+#######-------<{ Создание собственных шаблонов для карты }>---------###########
 
-    /*-------------------------------------------------------------------------------------------------------------
-    #######-------<{ Создание собственных шаблонов для карты }>---------###########
-      Есть 2 типа: "векторный слой"(VectorTileLayer) и слой "мозайка"(TileLayer) 
-      Создание этих карт происходит в ArcGISOnline, но как пока не понятно.
-      После того как карта создана можно получить id и загрузить её
-    */
+  Есть 2 типа: "векторный слой"(VectorTileLayer) и слой "мозайка"(TileLayer) 
+  Создание этих карт происходит в ArcGISOnline, но как пока не понятно.
+  После того как карта создана можно получить id и загрузить её
+*/
       //1й слой основной слой дорог
       const vectorTileLayer = new eVectorTileLayer({
         portalItem: {
@@ -138,22 +148,28 @@ import { loadModules } from 'ersi-loader';
         center: [-100,40],
         zoom: 3
       });
+/*------------------------------------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------------------------
+#######-------<{ Добавление фигур на карту }>---------###########
+  В отличие от виджетов, фигуры на карте присваиваются слоем(GraphicsLayer) самой карте,  а не на её
+  поверхность отображения. Так что сначала создаём карту, закладываем в неё фигуры и отображаем в 2d||3d режиме
+  
+  Принцип добавление графики:
+    map.add( new eGraphicsLayer().add( new eGraphic({}) ), new eGraphicsLayer().add( new eGraphic({}) ) )  
+*/
 
-    /*-------------------------------------------------------------------------------------------------------------
-    #######-------<{ Добавление фигур на карту }>---------###########
-      В отличие от виджетов, фигуры на карте присваиваются слоем(GraphicsLayer) самой карте,  а не на её
-      поверхность отображения. Так что сначала создаём карту, закладываем в неё фигуры и отображаем в 2d||3d режиме
-      
-    */
+
 
       const map = new eMap({
         basemap: "arcgis-topographic",
       });
     
-      //фигуры создаются через класс Graphic и каждый раз добавляются через класс GraphicsLayer
+      let graphicsLayer = new eGraphicsLayer(); //нужен для добавления Graphic фигур на слой карты
+      map.add(graphicsLayer);// Не забываем добавить на карту. слой добавили на карту
+
 
       let pointGraphic = new eGraphic({
-        geometry: { //описание геометрии фигуры
+        geometry: { 
           type: "point",//"point",  "polyline", "polygon", "multipoint","extent", "mesh"
           longitude: -118.80657463861,//долгота
           latitude: 34.0005930608889//широта
@@ -166,8 +182,24 @@ import { loadModules } from 'ersi-loader';
               color: [255, 255, 255], 
               width: 1
           }
-        }
+        },
+        // не обязательные. об этом далее
+        attributes: {},
+        popupTemplate: {
+          title: "Заголовок",
+          content: `<p style="height: 200px;">Тестовое описание</p>`
+        },
+        layer: {},
+        visible: true //видимость фигуры
+
       })
+
+      let clonePoint = pointGraphic.clone(); //создаёт глубокою копию. Зачем нужна с теми же координатами хз.
+      pointGraphic.setAttribute('Description', 'ddddddddddddd')
+      pointGraphic.getAttribute('Description');
+      pointGraphic.getObjectId()//должна вернуть id но возвращает null пока не ясно как этим пользоваться
+      pointGraphic.getEffectivePopupTemplate()//возвращает экземпляр PopupTemplate данной фигуры
+
 
       let polyline = new eGraphic({
         geometry: {
@@ -180,7 +212,7 @@ import { loadModules } from 'ersi-loader';
         },
         symbol: {
           type: "simple-line",
-          color: [226, 119, 40], // Orange
+          color: [226, 119, 40], 
           width: 2
         }
       })
@@ -219,14 +251,19 @@ import { loadModules } from 'ersi-loader';
     
       });
 
-      let graphicsLayer = new eGraphicsLayer();
-
-      //добавление фигур на графический слой
+    
       graphicsLayer.add(pointGraphic);
       graphicsLayer.add(polyline);
       graphicsLayer.add(polygon);
-
-      map.add(graphicsLayer);//слой добавили на карту
+      /*
+        На самом деле можно добавлять через экземпляр view. Разницы я не заметил и при этом не нужен модуль GraphicsLayer
+        Есть ещё пометка в доках:
+          Каждая графика может иметь свой собственный символ, указанный, если родительский слой является GraphicsLayer.
+          Такое добавление view.graphics.add(pointGraphic); как то ограничивает ли сами фигуры? 
+      */
+      view.graphics.add(pointGraphic);
+      view.graphics.add(pointGraphic);
+      view.graphics.add(pointGraphic);
 
       const view = new eMapView({
         map,
@@ -241,6 +278,7 @@ import { loadModules } from 'ersi-loader';
     */
         
   })
+   
 
 
 

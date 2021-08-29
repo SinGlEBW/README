@@ -304,27 +304,36 @@ export default connect(mapStateToProps, {
 
 
 /*---------------------------------------------------------------------------------------------------
-
-
-/*
-	Бывает такое что функции из reducer и методы из контейнера пересекаются в презентационной компоненте
-	поэтому если при передаче поставить правильный порядок то ненужные нам перезатираются
+########--------<{ Понятие Селекторы в React-Redux }>-------########
+	Это решение которое требует забирать данные в mapStateToProps через функции а не напрямую.  
 */
 
-
-/*
-		let toggle = await !this.state.formSwitch;
-
-		await this.setState({
-			formSwitch: toggle,
-			pathLogin: (toggle) ?  this.state.path + '/' : (`${this.state.path}/login`).replace(/^\/{2,}/, '/login')//true значит путь без login. При следующем клике(ВЫКЛ)
+const mapStateToProps = ({app}) => ({
+	users: app.pages.users
+})
+const mapStateToProps = ({app}) => ({
+	users: app.pages.users
+})
+const mapStateToProps = ({app}) => ({
+	users: app.pages.users
+})
+//... 
+/* Предположим мы в state изменили имя users на allowedUsers, в таком случае нам придётся лазить по всем компонентам и менять
+	 users: app.pages.allowedUsers. Не очень то и удобно. Раз у нас повторяется логика 	users: app.pages.users, то нужно занести это
+	 в функцию.
+	 Например:
 */
 
-/*
-	Из-за того что header не привязан к Router и пути мы отслеживаем путь по всем ссылкам.
-	1. При нажатии на любую ссылку нужно менять адрес +
-	2. Где бы я на находился при нажатии на регистрацию или авторизацию
-		 к адресу должно конкатенироваться /autorization или /registration,
-		 при этом контент не должен уходить
+const mapStateToProps = (state) => ({
+	users: getUsers(state)
+})
+const mapStateToProps = (state) => ({
+	users: getUsers(state)
+})
+const mapStateToProps = (state) => ({
+	users: getUsers(state)
+})
 
-*/
+
+const getUsers = ({app}) => (app.pages.users)//и теперь если будет изменение то имени то править будет в одном месте.
+

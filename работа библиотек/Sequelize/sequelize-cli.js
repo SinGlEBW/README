@@ -14,6 +14,8 @@
    config - за подключение с бд.
 Создание модели таблиц. (так же понадобиться пакет mysql2). Название модели с Заглавной т.к. это будет класс
    npx sequelize model:generate --name название --attributes название столбцов бд
+      Пример:
+         npx sequelize-cli model:generate --name User --attributes firstName:string,lastName:string,email:string
    добавляя при этом через :тип. после типа пробелов не должно быть. 
    создастся файл модели который описывает как мы видим таблицу. Можно до редактировать в ручную.
     Далее....
