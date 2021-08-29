@@ -322,6 +322,10 @@ shouldComponentUpdate (nextProp, nextState){  /* метод будет обно�
 }
 class myComponent extends PureComponent {} //уже несут данный конфиг shouldComponentUpdate
 
+
+/*----------------------------------------------------------------------------------------------------
+#######-------<{ О ref }>-------####### */
+
 /* ВАЖНО: В react нельзя обращаться напрямую к DOM через подобные обращения: document.querySelector и т.д. потому что он может не успеть отрисоватся.
           для этого есть createRef, но всё равно им не рекомендуется пользоваться.  */
 
@@ -339,10 +343,133 @@ React.createRef();/*react привязывает ссылку напрямую �
     }
 
 
+/*Что будет если форма будет компонентом и в родителе мы хотим получить к ней доступ в DOM */
+class Forma extends Component {
+
+  render () {
+    return (
+      <form onSubmit={this.props.handleSubmit} ref={this.props.ref}>
+        <input type="submit" value="Отправить">
+      </input>
+      </form>
+    )
+  }
+}
+
+
+
+class ParentComponent extends Component {
+
+  state = {
+    ref: React.createRef()
+  }
+  handleSend = (e) => {
+    e.preventDefault();
+    console.dir(this.state.ref);
+  }
+  render () {
+    return  <Forma handleSend={this.handleSend} ref={this.state.ref} />
+  }
+};
+
+/*
+  Если попытаться передать ссылку через компонент и через резервированный пропс ref, то 
+  в этой ссылке this.state.ref.current мы увидим компонент  Forma со всеми своими свойствами, а не элемент. 
+  Что бы увидеть элемент form нужно или передать через другой названый пропс или воспользоваться 
+  forwardRef.
+
+  
+ */
+//Вариант 1. Так будет нормально работать
+  class ParentComponent extends Component {
+
+    state = {
+      ref: React.createRef()
+    }
+    handleSend = (e) => {
+      e.preventDefault();
+      console.dir(this.state.ref);
+    }
+    render () {
+      return  <Forma handleSend={this.handleSend} myRef={this.state.ref} />
+      
+    }
+  };
+    
+/*
+  Вариант 2. С функциональной компонентой. Если обернуть функциональную компоненту в HOC React.forwardRef(Forma),
+  то получим 2м параметром ссылку ref передаваемую через зарезервированный пропс ref={this.state.ref}
+
+*/
+
+function Forma ({handleSubmit}, ref) {
+
+  return (      
+   <form onSubmit={handleSubmit} ref={ref}>
+     <input type="submit" value="Отправить"/>
+   </form>
+ )
+}
+
+let Forma1 = React.forwardRef(Forma)
+
+class ParentComponent extends Component {
+ state = {
+   ref: React.createRef()
+ }
+ handleSubmit = (e) => {
+  e.preventDefault();
+   console.dir(this.state.ref.current);//увидим элемент form
+ }
+ render () {
+   return <Forma1 handleSubmit={this.handleSubmit} ref={this.state.ref} />
+ }
+};
 
 
 
 
+
+
+
+
+
+
+/*--------------------------------------------------------------------------------------------------------------------------------------*/
+  /* Нюансы ref 
+    Если передать один и тот же ref многим элементам будем получать последний по списку элемент.
+    Например при клике на Кнопку1 будем получать данные Кнопки3 т.к. все элементы перезатёрты
+  */ 
+    
+    
+class ParentComponent extends Component {
+
+  state = {
+    ref: React.createRef()
+  }
+  handleClick = () => {
+    
+    console.dir(this.state.ref);//Кнопка 1 - будет
+  }
+  render () {
+    return (
+      <div className="box" >
+        <button className="FancyButton" ref={this.state.ref} onClick={this.handleClick}>Кнопка1</button>
+        <button className="FancyButton" ref={this.state.ref} onClick={this.handleClick}>Кнопка2</button>
+        <button className="FancyButton" ref={this.state.ref} onClick={this.handleClick}>Кнопка3</button>
+        {/* <Child handleClick={this.handleClick} ref={this.state.ref}>Кнопка2</Child> */}
+      </div>
+    )
+  }
+};
+    
+    
+
+
+
+/*----------------------------------------------------------------------------------------------------
+#######-------<{ this.setState }>-------####### */
+    
 this.setState({})
 this.setState((prevState, props) => ({count: prevState.count + props.count})); // требуется если нужно динамически использовать предыдущее значение
 

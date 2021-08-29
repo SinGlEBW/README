@@ -346,3 +346,7 @@ function maxMin({ name, value }){//передаём this element из DOM
     value = value.slice(0, stateItem.max)//value не передаст значение элементу
   }
 }
+
+
+err.constructor === Error  // true
+
