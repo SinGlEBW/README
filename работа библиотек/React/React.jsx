@@ -729,8 +729,78 @@ class Parent extends Component{
 
 
 
+"-----------------------------------------------------------------------"
+"#########-------<{ Нестандартные решения прокидывания компонентов }>-------#########"
+
+/* Смысл createPortal в том что бы поместить jsx компонента в любое место в DOM, а сам компонент размещаем в любом месте это всего лишь
+  триггер */
+
+class Modal extends React.Component {
+  state = {
+    el: document.createElement('div'),
+    box: null
+  }
+
+  componentDidMount() {
+    this.setState((state)=>{
+      let box = document.getElementById('box');
+      box.appendChild(this.state.el);
+      return {
+        ...state, box
+      }
+    })
+  }
+
+  componentWillUnmount() {
+    this.state.box.removeChild(this.state.el);
+  }
+
+  render() {
+    
+    /* Из-за того что при render мы не успеваем получить id какого-то блока, т.к. render отрабатывает раньше 
+      componentDidMount, мы кладём children в пустой el, а в componentDidMount уже запихиваем в нужный элемент 
+      не важно где он в DOM  */
+    return ReactDOM.createPortal(
+      this.props.children,
+      this.state.el
+    );
+  }
+}
+
+class Parent extends React.Component {
+  state = { clicks: 0 };
+  handleClick = this.handleClick.bind(this);
 
 
+  handleClick() {
+    this.setState(state => ({
+      clicks: state.clicks + 1
+    }));
+  }
+
+  render() {
+    return (
+      <div className='test'>
+        <div onClick={this.handleClick}>
+          <p>Количество кликов: {this.state.clicks}</p>
+          <Modal>
+            <Child />
+          </Modal>
+        </div>
+
+        <div id="box"></div>{/*Компонент  Child будет тут*/}
+      </div>
+    );
+  }
+}
+
+function Child() {
+  return (
+    <div className="modal">
+      <div>Какой-то контент</div>
+    </div>
+  );
+}
 
 
 
