@@ -1,4 +1,5 @@
-/* В react спокойно могу импортировать модули 2мя способами. Обычный: */
+/* eslint-disable no-alert, no-console */
+/*  Обычный способ подключения */
   
     import Map from '@arcgis/core/Map';
     import argConfig from '@arcgis/core/config';
@@ -47,30 +48,106 @@ import { loadModules, loadCss } from 'esri-loader';
     ])=> {
 
       eCfg.apiKey = 'токен';//для использования пакета выдают токен в личном кабинете arcgis
+      /* 
+        1. Все слои добавляються на карту, а карта отрисовываеться в желаемом формате используя 2d(класс MapView) или 3d(SceneView).
+        2. Есть как минимум 3 способа добавить как слои на карту так и в слои графику. 
+              Классы слоёв: FeatureLayers || WebTileLayers || GraphicsLayers
 
+               a) let instansMap = new Map({layers: экземпляр_слоя})    
+               b) instansMap.add(экземпляр_слоя)//для динамического добавления слоёв
+               с) instansMap.addMany([экземпляр_слоя])//для динамического добавления слоёв
+            Для график let instansGraphic = new GraphicsLayers({grapgic: экземпляр_graphic})    
+        3. Не смотря на на что напихиваем например в один GraphicLayer много new Graphic для Map это один слой
+            это нужно учитывать если мы хотим менять zIndex слоёв через map.reorder, возможно нам менять zIndex надо на одном слое? 
+      */
       const map = new eMap({
-        basemap: 'arcgis-topographic',/*разрешить доступ службе слоя базовой карты. Заготовленный шаблон
-                                        можно самому создать шаблон*/
-        ground: "world-elevation", //параметр для SceneView, земля становится объёмной
+        basemap: 'arcgis-topographic',/*Заготовленный шаблон(профиль) карты. Можно самому создать шаблон*/                              
+        ground: "world-elevation", //параметр для (3d)SceneView, земля становится объёмной
+        
+        layers: [FeatureLayers, WebTileLayers, GraphicsLayers],//поддерживает один или массив перечисленных слоёв 
+        tables: ["пока хз"]
       })
+
+
+
+
+      /* Экземпляр map из полезного содержит: 
+          только чтение:  */
+        initialized: bool //проинициализирована ли карта
+        map.destroyed//вызыван ли destroy
+         allLayers: {// allTables, editableLayers - содержать те же свойства и методы
+            getChildrenFunction()
+            getCollections()
+            itemFilterFunction()
+            items: Array(3)
+            length: 3
+            on()
+            filter((item, inx, )=>{})//перебирает items, но только наши подклёчённые слои. В items могут быть ещё слои если подлючён готовый basemap
+        }
+        allTables: {}
+        editableLayers: {}//какие-то редактируемые слои
+        
+        //методы
+        add(layer)
+        addMany([layer])
+        remove(layer)
+        removeAll()
+        removeMany([layer])
+        destroy(),//Вырубает карту
+        findLayerById(id)//вернёт слой
+        findTableById(id)
+        
+        
+
+
+
+
       /*
         Карты, сцены, слои являются основой для всех приложений визуального картографирования.
-        Map - для создания 2D-приложений, Scene - для создания 3D-приложений. 
+        MapView - для создания 2D-приложений, SceneView - для создания 3D-приложений. 
         2D и 3D варианты используют слои.
       */
 
-    //настройки показа 2d карты
-      const view = new eMapView({
+    
+      const view = new eMapView({//настройки показа 2d карты
         map,
+        container: "viewDiv", // div элемент
         //координаты можно узнать в личном кабинете. об этом позже
         center: [-118.847, 34.027], // смещение по x(долгота) y(широта). 0 0 это где-то в индийском океане
         zoom: 13, // уровень увеличения
-        container: "viewDiv" // div элемент
+      	/*
+					allLayerViews,
+			animation,
+			background,
+			basemapView,
+			breakpoints,
+			constraints,
+			extent,
+			fatalError,
+			floors,
+			graphics,
+			heightBreakpoint,
+			highlightOptions,
+			layerViews,
+			navigation,
+			padding,
+			resizeAlign,
+			popup,
+			rotation,
+			scale,
+			spatialReference,
+			timeExtent,
+			ui,
+			viewpoint,
+			widthBreakpoint
+			
+			*/
       });
 
     //настройки показа 3d карты
       const view = new eSceneView({//на карте появятся доп. значки управления картой 
         map,
+        container: "viewDiv", 
         camera: {
           position: {
             x: -118.808,
@@ -79,7 +156,7 @@ import { loadModules, loadCss } from 'esri-loader';
           },
           tilt: 90//угол наклона камеры на высоте z
         },
-        container: "viewDiv" 
+       
       });
 
 
@@ -281,6 +358,32 @@ import { loadModules, loadCss } from 'esri-loader';
    
 
 
+/*-------------------------------------------------------------------------------------------------------------
+#######-------<{ Методы Map + Примеры }>---------###########
+*/
 
+
+
+
+//Изменение zIndex Слоёв на карте
+let graphicsLayer = new GraphicsLayer({id: 'test1'});
+let graphicsLayer1 = new GraphicsLayer({id: 'test2'});
+graphicsLayer.add(pointGraphic);
+graphicsLayer1.add(pointGraphic2)
+const map = new Map({
+  basemap: "streets-vector",
+  // ground: "world-elevation",
+  layers: [graphicsLayer,graphicsLayer1]
+
+})
+
+const view = new MapView({
+  map,
+  center: [-118.747, 34.007],
+  zoom: 13,
+  container: "viewDiv",
+});
+
+map.reorder(graphicsLayer1, 0)
 
 
