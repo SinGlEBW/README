@@ -1,13 +1,11 @@
 /* eslint-disable no-alert, no-console */
 /*  Обычный способ подключения */
-  
-    import Map from '@arcgis/core/Map';
-    import argConfig from '@arcgis/core/config';
-    import Graphic from '@arcgis/core/Graphic';
-    import MapView from '@arcgis/core/views/MapView';
-    import WebTileLayer from '@arcgis/core/layers/WebTileLayer';
-    import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
-
+import Map from '@arcgis/core/Map';
+import argConfig from '@arcgis/core/config';
+import Graphic from '@arcgis/core/Graphic';
+import MapView from '@arcgis/core/views/MapView';
+import WebTileLayer from '@arcgis/core/layers/WebTileLayer';
+import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
 /*или установить пакет esri-loader это обёртка над @arcgis. Подключение пакетов выглядит иначе и имеет приписку esri.*/
 
 import { loadModules, loadCss } from 'esri-loader'; 
@@ -50,23 +48,32 @@ import { loadModules, loadCss } from 'esri-loader';
       eCfg.apiKey = 'токен';//для использования пакета выдают токен в личном кабинете arcgis
       /* 
         1. Все слои добавляються на карту, а карта отрисовываеться в желаемом формате используя 2d(класс MapView) или 3d(SceneView).
-        2. Есть как минимум 3 способа добавить как слои на карту так и в слои графику. 
+        2. Есть как минимум 5 способов добавить как слои на карту так и в слои графику. 
               Классы слоёв: FeatureLayers || WebTileLayers || GraphicsLayers
 
                a) let instansMap = new Map({layers: экземпляр_слоя})    
                b) instansMap.add(экземпляр_слоя)//для динамического добавления слоёв
                с) instansMap.addMany([экземпляр_слоя])//для динамического добавления слоёв
-            Для график let instansGraphic = new GraphicsLayers({grapgic: экземпляр_graphic})    
+                  
+               d) map.layers = [экземпляр_слоя1, экземпляр_сло2] //заглянув в map.layers мы увидим не массив а объект с items, даже после такого добавления
+               e) map.layers.push(экземпляр_слоя1, экземпляр_сло2)
+        Для график всё тоже самое только обращение к свойству graphic let instansGraphic = new GraphicsLayers({graphic: экземпляр_graphic})    
+
         3. Не смотря на на что напихиваем например в один GraphicLayer много new Graphic для Map это один слой
             это нужно учитывать если мы хотим менять zIndex слоёв через map.reorder, возможно нам менять zIndex надо на одном слое? 
+        4. Нельзя один и тот же слой пихать на разные карты:
+              let layer = new GraphicsLayer();
+                map1.layers.add(layer); - Слой принадлежит карте 1 
+                map2.layers.add(layer); - Слой теперь принадлежит карте 2 и будет автоматически удалён из карты 1 map1.layers.remove(layer) 
       */
       const map = new eMap({
         basemap: 'arcgis-topographic',/*Заготовленный шаблон(профиль) карты. Можно самому создать шаблон*/                              
-        ground: "world-elevation", //параметр для (3d)SceneView, земля становится объёмной
-        
-        layers: [FeatureLayers, WebTileLayers, GraphicsLayers],//поддерживает один или массив перечисленных слоёв 
-        tables: ["пока хз"]
+        ground: "world-elevation", //параметр для (3d)SceneView, земля становится объёмной. Присваивать можно new Ground({})
+        //порядок слоёв важен
+        layers: [FeatureLayers, WebTileLayers, GraphicsLayers],// 2d слои. один или массив перечисленных слоёв. 
+        //layers: [VectorTileLayer, WebTileLayer, WMTSLayer],// или 3d слои,
       })
+
 
 
 
@@ -74,7 +81,8 @@ import { loadModules, loadCss } from 'esri-loader';
       /* Экземпляр map из полезного содержит: 
           только чтение:  */
         initialized: bool //проинициализирована ли карта
-        map.destroyed//вызыван ли destroy
+        destroyed: bool//вызыван ли destroy
+
          allLayers: {// allTables, editableLayers - содержать те же свойства и методы
             getChildrenFunction()
             getCollections()
@@ -86,17 +94,23 @@ import { loadModules, loadCss } from 'esri-loader';
         }
         allTables: {}
         editableLayers: {}//какие-то редактируемые слои
-        
+        /*
+          несмотря на то что можем присваивать к данным свойствам массив layers = [], мы всё равно можем обратиться
+          layers.items, что очень странно. Видим объект, layers но можем обращаться как к массиву вызвав любой метод массива 
+        */ 
+        layers: {
+          items: []//массив 
+        }
+        tables: {}
+
         //методы
         add(layer)
         addMany([layer])
-        remove(layer)
-        removeAll()
-        removeMany([layer])
+        remove(layer), removeMany([layer]), removeAll(), //удаление слоёв
         destroy(),//Вырубает карту
         findLayerById(id)//вернёт слой
         findTableById(id)
-        
+        reorder(layer, inx);// перемещает слой в массиве изменяя его zIndex относительно других слоёв
         
 
 
@@ -216,7 +230,7 @@ import { loadModules, loadCss } from 'esri-loader';
       });
       //инициализируем наш профиль в карте
       const map = new Map({
-        basemap: basemap,
+        basemap,
       });
       //выводим в 2d карте и настраиваем
       const view = new eMapView({
@@ -231,7 +245,9 @@ import { loadModules, loadCss } from 'esri-loader';
   В отличие от виджетов, фигуры на карте присваиваются слоем(GraphicsLayer) самой карте,  а не на её
   поверхность отображения. Так что сначала создаём карту, закладываем в неё фигуры и отображаем в 2d||3d режиме
   
-  Принцип добавление графики:
+  Как сказано было ранее есть 5 способов добавить графику на слой. 
+   
+  
     map.add( new eGraphicsLayer().add( new eGraphic({}) ), new eGraphicsLayer().add( new eGraphic({}) ) )  
 */
 
@@ -362,7 +378,7 @@ import { loadModules, loadCss } from 'esri-loader';
 #######-------<{ Методы Map + Примеры }>---------###########
 */
 
-
+map.reorder(graphicsLayer1, 0);
 
 
 //Изменение zIndex Слоёв на карте
@@ -387,3 +403,63 @@ const view = new MapView({
 map.reorder(graphicsLayer1, 0)
 
 
+/*-------------------------------------------------------------------------------------------------------------
+###########---------<{ Настройка popup }>---------###########
+    
+  Не загружая модуль "esri/widgets/Popup", можно воспользоваться некоторыми предустановленными настройками.
+  Половину свойств не работает хоть и написано что можно что либо передавать. 
+
+
+  Есть модуль Popup - с более расширенным функционалом, и PopupTemplate - скромней функционал
+*/
+
+
+
+view.popup.alignment = "bottom-right";/*Если popup не привязан к какой либо стороне путём внесением изменения данных в position, то
+                                        можно отрегулировать его положение относительно элемента на котором вызываем popup*/
+
+
+//только чтение
+view.popup.dockEnabled = true;//по ум. false. закреплён ли popup к границам просмотра
+
+
+
+//не чтение
+view.popup.autoOpenEnabled = false;/*При указании в Graphic свойства popupTemplate будет включен стандартный popup при клике по элементам. Если хотим менять на свой нужно его выключить*/
+view.popup.open({//Можно открывать popup в событиях 
+  title: "Reverse geocode: [" + lon + ", " + lat + "]",
+  location: event.mapPoint, 
+  content: "This is a point of interest" 
+});
+
+
+
+/*
+  По ум. popup настроен таким образом при достижении < 544px popup прилипает к низу и это поведение не изменить.
+  Можно указать breakpoint для смещения этого поведения и даже указывать position, но в любом случаем < 544 он прилипнет к низу
+*/
+view.popup.dockOptions = {
+  breakpoint: { width: 544, height: 544 }, /*@media max-width: 544. Всё что ниже поведение popup заточено под мобилу
+                                            View size < breakpoint  то растягивается на 100% в ширину*/
+  buttonEnabled: true, //показать или скрыть кнопку открепляющую popup от границ view
+}
+
+/*-----------------------------------------------------------------------------------------------------------------------------
+##########-------------<{  Добавление кнопок в popup }>-----------#############
+*/
+
+view.popup.actions.push({title: 'Кнопки1', id: 'test-id', className: 'my-popup'});//описываем объект на который будем ориентироваться 
+
+view.popup.on("trigger-action", function(event){//отрабатывает на любые кнопки на popup
+ 
+  if(event.action.id === "test-id"){
+    test();
+  }
+});
+
+
+
+
+/*-----------------------------------------------------------------------------------------------------------------------------
+##########-------------<{ Раздел popupTemplate }>-----------#############
+*/
