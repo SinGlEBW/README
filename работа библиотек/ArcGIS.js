@@ -48,7 +48,9 @@ import { loadModules, loadCss } from 'esri-loader';
       eCfg.apiKey = 'токен';//для использования пакета выдают токен в личном кабинете arcgis
       /* 
         1. Все слои добавляються на карту, а карта отрисовываеться в желаемом формате используя 2d(класс MapView) или 3d(SceneView).
-        2. Есть как минимум 5 способов добавить как слои на карту так и в слои графику. 
+        2. К опциям классов есть взможность обращаться через экземпляр. 
+        3. Есть как минимум 5 стандартный способов добавить как слои на карту так и в слои графику.
+          (Ни кто не мешает выходить на данные свойства и методы через другие экземпляры и под тем же соусом взаимодействовать с ними. ) 
               Классы слоёв: FeatureLayers || WebTileLayers || GraphicsLayers
 
                a) let instansMap = new Map({layers: экземпляр_слоя})    
@@ -59,21 +61,40 @@ import { loadModules, loadCss } from 'esri-loader';
                e) map.layers.push(экземпляр_слоя1, экземпляр_сло2)
         Для график всё тоже самое только обращение к свойству graphic let instansGraphic = new GraphicsLayers({graphic: экземпляр_graphic})    
 
-        3. Не смотря на на что напихиваем например в один GraphicLayer много new Graphic для Map это один слой
+          Экземпляр view наследует экземпляр map: view.map.layers = [экземпляр_слоя1, экземпляр_сло2]
+
+          ВАЖНО:
+            Казалось бы заманчивая идея исключить GraphicsLayers и кидать графику сразу же в view.graphic = [graphic1, graphic2], 
+            но загвозка в том что мы не сможем воспользоваться возможностью предлагаемых опций от new GraphicsLayers({}), я пробовал.
+            Зная о том что мы обычно GraphicsLayers добавляем в Map, то добравшись туда, действительно видим что переданная графика через
+            view.graphic автоматически обернулась GraphicsLayers в Map, но как только мы туда обращаемя видим undefined т.к. это асинхронная операция.
+            
+
+
+
+
+        4. Не смотря на на что напихиваем например в один GraphicLayer много new Graphic для Map это один слой
             это нужно учитывать если мы хотим менять zIndex слоёв через map.reorder, возможно нам менять zIndex надо на одном слое? 
-        4. Нельзя один и тот же слой пихать на разные карты:
+        5. Нельзя один и тот же слой пихать на разные карты:
               let layer = new GraphicsLayer();
                 map1.layers.add(layer); - Слой принадлежит карте 1 
                 map2.layers.add(layer); - Слой теперь принадлежит карте 2 и будет автоматически удалён из карты 1 map1.layers.remove(layer) 
       */
-      const map = new eMap({
-        basemap: 'arcgis-topographic',/*Заготовленный шаблон(профиль) карты. Можно самому создать шаблон*/                              
-        ground: "world-elevation", //параметр для (3d)SceneView, земля становится объёмной. Присваивать можно new Ground({})
+      const map = new eMap({//иногда используют WebMap
+        basemap: 'dark-gray',/*Заготовленный шаблон(профиль) карты. В документации есть кучу Basemaps шаблонов 
+                             для тех у кого токен, и без него. Можно самому создать шаблон или использовать готовый*/                              
+        ground: "world-elevation", /*параметр для (3d)SceneView земли. Не должно быть null или undefined, должен иметь или заготовленый
+                                    профиль от Ground или сам экземпляр  new Ground({}).
+                                    В MapView может использоваться если используем виджет с классами ElevationProfileLineGround, new ElevationLayers({}) new ElevationProfile({}) 
+                "world-elevation" - 3d земля, работает через Terrain3D Service
+                "world-topobathymetry" - 3d грунт, сервис TopoBathy3D
+                 */
         //порядок слоёв важен
         layers: [FeatureLayers, WebTileLayers, GraphicsLayers],// 2d слои. один или массив перечисленных слоёв. 
         //layers: [VectorTileLayer, WebTileLayer, WMTSLayer],// или 3d слои,
+        //layers: [MapImageLayer , ImageryLayer , WMSLayer ],// какие-то динамические слои,
       })
-
+      
 
 
 
@@ -82,17 +103,30 @@ import { loadModules, loadCss } from 'esri-loader';
           только чтение:  */
         initialized: bool //проинициализирована ли карта
         destroyed: bool//вызыван ли destroy
-
+        declaredClass: "esri.Map"//указывает что за класс используем. 
          allLayers: {// allTables, editableLayers - содержать те же свойства и методы
+        /*Странно то что  allLayers объект, но носледует он (кастомные) методы Array и на нём их можем использовать 
+        не смотря на то что это объект и эти методы возвращают специфичный объект*/
+
             getChildrenFunction()
             getCollections()
             itemFilterFunction()
             items: Array(3)
             length: 3
-            on()
-            filter((item, inx, )=>{})//перебирает items, но только наши подклёчённые слои. В items могут быть ещё слои если подлючён готовый basemap
+            
+            filter((item, inx, )=>{}),//перебирает items, но только наши подклёчённые слои. В items могут быть ещё слои если подлючён готовый basemap
+            flatten(()=>{}), map(()=>{})//даже если ничего не возвращать всё равно вернёт объект, просто не изменёный
+            getItemAt(1);//вернуть слой по найденный по inx
+            on()//change, after-add, after-changes, after-remove и для before 
+            /* Пример 
+                  map.allLayers.on("change", function(event) {
+                    console.log("Layer added: ", event.added);
+                    console.log("Layer removed: ", event.removed);
+                    console.log("Layer moved: ", event.moved);
+                  });
+            */
         }
-        allTables: {}
+        allTables: {}//что бы работать с этим объектом мы должны использовать вместо графики new Featurelayer 
         editableLayers: {}//какие-то редактируемые слои
         /*
           несмотря на то что можем присваивать к данным свойствам массив layers = [], мы всё равно можем обратиться
@@ -239,6 +273,7 @@ import { loadModules, loadCss } from 'esri-loader';
         center: [-100,40],
         zoom: 3
       });
+
 /*------------------------------------------------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------------------------------------------
 #######-------<{ Добавление фигур на карту }>---------###########
@@ -248,16 +283,16 @@ import { loadModules, loadCss } from 'esri-loader';
   Как сказано было ранее есть 5 способов добавить графику на слой. 
    
   
-    map.add( new eGraphicsLayer().add( new eGraphic({}) ), new eGraphicsLayer().add( new eGraphic({}) ) )  
 */
 
 
 
-      const map = new eMap({
-        basemap: "arcgis-topographic",
-      });
+      const map = new eMap({ basemap: "arcgis-topographic" });
     
-      let graphicsLayer = new eGraphicsLayer(); //нужен для добавления Graphic фигур на слой карты
+      let graphicsLayer = new eGraphicsLayer({
+        id: 'layer1',
+        minScale: 80000, //отображает слой если scale меньше 80000
+      }); //нужен для добавления Graphic фигур на слой карты
       map.add(graphicsLayer);// Не забываем добавить на карту. слой добавили на карту
 
 
@@ -371,8 +406,11 @@ import { loadModules, loadCss } from 'esri-loader';
     */
         
   })
-   
 
+/*-------------------------------------------------------------------------------------------------------------
+#######-------<{ Класс FeatureLayer }>---------###########
+*/
+  let gl = new FeatureLayer();
 
 /*-------------------------------------------------------------------------------------------------------------
 #######-------<{ Методы Map + Примеры }>---------###########
