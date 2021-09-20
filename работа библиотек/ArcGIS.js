@@ -104,7 +104,7 @@ import { loadModules, loadCss } from 'esri-loader';
         initialized: bool //проинициализирована ли карта
         destroyed: bool//вызыван ли destroy
         declaredClass: "esri.Map"//указывает что за класс используем. 
-         allLayers: {// allTables, editableLayers - содержать те же свойства и методы
+        allLayers: {// allTables, editableLayers - содержать те же свойства и методы
         /*Странно то что  allLayers объект, но носледует он (кастомные) методы Array и на нём их можем использовать 
         не смотря на то что это объект и эти методы возвращают специфичный объект*/
 
@@ -165,31 +165,31 @@ import { loadModules, loadCss } from 'esri-loader';
         zoom: 13, // уровень увеличения
       	/*
 					allLayerViews,
-			animation,
-			background,
-			basemapView,
-			breakpoints,
-			constraints,
-			extent,
-			fatalError,
-			floors,
-			graphics,
-			heightBreakpoint,
-			highlightOptions,
-			layerViews,
-			navigation,
-			padding,
-			resizeAlign,
-			popup,
-			rotation,
-			scale,
-			spatialReference,
-			timeExtent,
-			ui,
-			viewpoint,
-			widthBreakpoint
+          animation,
+          background,
+          basemapView,
+          breakpoints,
+          constraints,
+          extent,
+          fatalError,
+          floors,
+          graphics,
+          heightBreakpoint,
+          highlightOptions,
+          layerViews,
+          navigation,
+          padding,
+          resizeAlign,
+          popup,
+          rotation,
+          scale,
+          spatialReference,
+          timeExtent,
+          ui,
+          viewpoint,
+          widthBreakpoint
 			
-			*/
+			  */
       });
 
     //настройки показа 3d карты
@@ -304,7 +304,7 @@ import { loadModules, loadCss } from 'esri-loader';
         },
         symbol: {//как будет выглядеть
           type: "simple-marker", /*"simple-marker", "text", "simple-line", "simple-fill", "picture-fill", "shield-label-symbol",
-                                   "picture-marker", "point-3d","line-3d", "polygon-3d", "web-style", "mesh-3d", "label-3d", "cim";*/
+                                   "picture-marker", "point-3d","line-3d", "polygon-3d", "web-style", "mesh-3d", "label-3d", "cim", */
           color: [226, 119, 40], 
           outline: {
               color: [255, 255, 255], 
