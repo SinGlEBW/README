@@ -46,8 +46,8 @@ import { loadModules, loadCss } from 'esri-loader';
     ])=> {
 
       eCfg.apiKey = 'токен';//для использования пакета выдают токен в личном кабинете arcgis
-      /* 
-        1. Все слои добавляються на карту, а карта отрисовываеться в желаемом формате используя 2d(класс MapView) или 3d(SceneView).
+      /* СЛОИ ЭТО ЭТО ОБЕЩАНИЯ.
+        1. Все слои добавляются на карту, а карта отрисовывается в желаемом формате используя 2d(класс MapView) или 3d(SceneView).
         2. К опциям классов есть взможность обращаться через экземпляр. 
         3. Есть как минимум 5 стандартный способов добавить как слои на карту так и в слои графику.
           (Ни кто не мешает выходить на данные свойства и методы через другие экземпляры и под тем же соусом взаимодействовать с ними. ) 
@@ -65,9 +65,9 @@ import { loadModules, loadCss } from 'esri-loader';
 
           ВАЖНО:
             Казалось бы заманчивая идея исключить GraphicsLayers и кидать графику сразу же в view.graphic = [graphic1, graphic2], 
-            но загвозка в том что мы не сможем воспользоваться возможностью предлагаемых опций от new GraphicsLayers({}), я пробовал.
+            но загвоздка в том что мы не сможем воспользоваться возможностью предлагаемых опций от new GraphicsLayers({}), я пробовал.
             Зная о том что мы обычно GraphicsLayers добавляем в Map, то добравшись туда, действительно видим что переданная графика через
-            view.graphic автоматически обернулась GraphicsLayers в Map, но как только мы туда обращаемя видим undefined т.к. это асинхронная операция.
+            view.graphic автоматически обернулась GraphicsLayers в Map, но как только мы туда обращаемся видим undefined т.к. это асинхронная операция.
             
 
 
@@ -138,15 +138,20 @@ import { loadModules, loadCss } from 'esri-loader';
         tables: {}
 
         //методы
-        add(layer)
-        addMany([layer])
+       
+        add(layer), addMany([layer]) //добавить на карту слой или пачку слоёв или map.layers.push(layer, layer2);
         remove(layer), removeMany([layer]), removeAll(), //удаление слоёв
         destroy(),//Вырубает карту
-        findLayerById(id)//вернёт слой
+        findLayerById(id)//найти слой по id
         findTableById(id)
         reorder(layer, inx);// перемещает слой в массиве изменяя его zIndex относительно других слоёв
         
 
+
+     
+/*------------------------------------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------------------------
+#######-------<{ Раздел View }>---------###########
 
 
 
@@ -163,33 +168,35 @@ import { loadModules, loadCss } from 'esri-loader';
         //координаты можно узнать в личном кабинете. об этом позже
         center: [-118.847, 34.027], // смещение по x(долгота) y(широта). 0 0 это где-то в индийском океане
         zoom: 13, // уровень увеличения
-      	/*
-					allLayerViews,
-          animation,
-          background,
-          basemapView,
-          breakpoints,
-          constraints,
-          extent,
-          fatalError,
-          floors,
-          graphics,
-          heightBreakpoint,
-          highlightOptions,
-          layerViews,
-          navigation,
-          padding,
-          resizeAlign,
-          popup,
-          rotation,
-          scale,
-          spatialReference,
-          timeExtent,
-          ui,
-          viewpoint,
-          widthBreakpoint
+      	
+        allLayerViews,
+        animation,
+        background,
+        basemapView,
+        breakpoints,
+        constraints: {
+          minScale: 150000,//до какого предела увеличивается карта
+        },
+        extent,
+        fatalError,
+        floors,
+        graphics,
+        heightBreakpoint,
+        highlightOptions,
+        layerViews,
+        navigation,
+        padding,
+        resizeAlign,
+        popup,
+        rotation,
+        scale,
+        spatialReference,
+        timeExtent,
+        ui,
+        viewpoint,
+        widthBreakpoint
 			
-			  */
+			  
       });
 
     //настройки показа 3d карты
@@ -208,71 +215,33 @@ import { loadModules, loadCss } from 'esri-loader';
       });
 
 
-/*------------------------------------------------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------------------------------------------
-#######-------<{ Добавление виджетов на карту }>---------###########
-
-  Например переключение на гибрид.
-  Виджеты добавляются на поверхность отображённой карты. 
-  (далее будут фигуры на карте, они закладываются предварительно в карту, и карта закидывается в 2d-3d отображение) 
-  
-*/
-
-    const basemapToggle = new eBasemapToggle({//мини виджет миникарт: гибрид, топография
-      view: view, //добавляем карту 2d или 3d карту
-      nextBasemap: "arcgis-imagery"
-    });
-    
-    view.ui.add(basemapToggle, 'bottom-right')//указываем, какой виджет добавить и куда
 
 
-    const BasemapGallery = new eBasemapGallery({//виджет со скролом вариантов карт
-      view: view, 
-      source: {
-        query: {
-          title: '"World Basemaps for Developers" AND owner:esri',//это типа какой-то запрос вариантов отображаемых в виджете
-        }
-      }
-    });
-    
-    view.ui.add(BasemapGallery, 'top-right')//указываем, какой виджет добавить и куда
 
-/*------------------------------------------------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------------------------------------------
-#######-------<{ Создание собственных шаблонов для карты }>---------###########
 
-  Есть 2 типа: "векторный слой"(VectorTileLayer) и слой "мозайка"(TileLayer) 
-  Создание этих карт происходит в ArcGISOnline, но как пока не понятно.
-  После того как карта создана можно получить id и загрузить её
-*/
-      //1й слой основной слой дорог
-      const vectorTileLayer = new eVectorTileLayer({
-        portalItem: {
-          id: "6976148c11bd497d8624206f9ee03e30" 
-        },
-        opacity: .75
-      });
-      //2й слой рельефа 
-      const imageTileLayer = new eTileLayer({
-        portalItem: {
-          id: "1b243539f4514b6ba35e7d995890db1d" 
-        }
-      });
-      //складываем слои на слой рельефа наложен будет слой дорог
-      const basemap = new eBasemap({
-        baseLayers: [ imageTileLayer, vectorTileLayer ]//порядок имеет значение
-      });
-      //инициализируем наш профиль в карте
-      const map = new Map({
-        basemap,
-      });
-      //выводим в 2d карте и настраиваем
-      const view = new eMapView({
-        container: "viewDiv",
-        map: map,
-        center: [-100,40],
-        zoom: 3
-      });
+/*#######-------<{ События  View }>---------########### */
+//Отрабатывает всякий  раз когда создаётся слой
+ view.on("layerview-create", (event) => {
+  if (event.layer.id === "ny-housing") {
+    console.log( event.layerView);
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*------------------------------------------------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------------------------------------------
@@ -282,18 +251,9 @@ import { loadModules, loadCss } from 'esri-loader';
   
   Как сказано было ранее есть 5 способов добавить графику на слой. 
    
-  
+  Отличие GraphicsLayer от FeatureLayer и MapImageLayer, GraphicsLayer содержит несколько типов: "point", "polygon", "line".
+  Для начала нужно накидать фигур на слой после чего его подключить на карту.
 */
-
-
-
-      const map = new eMap({ basemap: "arcgis-topographic" });
-    
-      let graphicsLayer = new eGraphicsLayer({
-        id: 'layer1',
-        minScale: 80000, //отображает слой если scale меньше 80000
-      }); //нужен для добавления Graphic фигур на слой карты
-      map.add(graphicsLayer);// Не забываем добавить на карту. слой добавили на карту
 
 
       let pointGraphic = new eGraphic({
@@ -322,12 +282,7 @@ import { loadModules, loadCss } from 'esri-loader';
 
       })
 
-      let clonePoint = pointGraphic.clone(); //создаёт глубокою копию. Зачем нужна с теми же координатами хз.
-      pointGraphic.setAttribute('Description', 'ddddddddddddd')
-      pointGraphic.getAttribute('Description');
-      pointGraphic.getObjectId()//должна вернуть id но возвращает null пока не ясно как этим пользоваться
-      pointGraphic.getEffectivePopupTemplate()//возвращает экземпляр PopupTemplate данной фигуры
-
+  
 
       let polyline = new eGraphic({
         geometry: {
@@ -379,38 +334,158 @@ import { loadModules, loadCss } from 'esri-loader';
     
       });
 
+
+      
+//Методы экземпляра Graphic 
+let clonePoint = pointGraphic.clone(); //создаёт глубокою копию. Зачем нужна с теми же координатами хз.
+pointGraphic.setAttribute('Description', 'ddddddddddddd')
+pointGraphic.getAttribute('Description');
+pointGraphic.getObjectId()//должна вернуть id но возвращает null пока не ясно как этим пользоваться
+pointGraphic.getEffectivePopupTemplate()//возвращает экземпляр PopupTemplate данной фигуры
+
+
+
+
+  //5 способов добавления фигуры в слой:
+      let layer = new GraphicsLayer({
+        graphics: [graphicA],
+      });
+
+   
+      layer.graphics.add(graphicB);
+      layer.addMany([graphicD, graphicE]);
+      layer.graphics.push(graphicA, graphicB);
+      layer.graphics = [graphicA, graphicB]; //Вместо layer.add = graphicA
+
+ 
+
+      map.add(layer);
+
+      const view = new eMapView({
+        map,//добавляем экземпляр map на 2d view
+        center: [-118.80500,34.02700], //Longitude, latitude
+        zoom: 13,
+        container: "viewDiv",
+      });
+
     
-      graphicsLayer.add(pointGraphic);
-      graphicsLayer.add(polyline);
-      graphicsLayer.add(polygon);
+ 
       /*
         На самом деле можно добавлять через экземпляр view. Разницы я не заметил и при этом не нужен модуль GraphicsLayer
         Есть ещё пометка в доках:
           Каждая графика может иметь свой собственный символ, указанный, если родительский слой является GraphicsLayer.
           Такое добавление view.graphics.add(pointGraphic); как то ограничивает ли сами фигуры? 
       */
-      view.graphics.add(pointGraphic);
-      view.graphics.add(pointGraphic);
-      view.graphics.add(pointGraphic);
 
-      const view = new eMapView({
-        map,
-        center: [-118.80500,34.02700], //Longitude, latitude
-        zoom: 13,
-        container: "viewDiv"
-      });
 
-    /*-------------------------------------------------------------------------------------------------------------
-    #######-------<{ Добавление слоёв на карту }>---------###########
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Возможные опции в GraphicsLayer
+  const districtGraphicsLayer = new GraphicsLayer({
+    //возможные опции
+    id: "layer1",
+    title,
+    blendMode: "soft-light",
+    effect: "brightness(5) hue-rotate(270deg) contrast(200%)", //функции от css filter:
+    elevationInfo: {}, //только для SceneView. Настройка оси z в 3d пространстве
+    opacity: 0.5,
+    screenSizePerspectiveEnabled: true, // значки размещённые на карте при увеличении и уменьшении правильно располагаются относительно карты
+    graphics: [graphicA],
+  
+    elevationInfo,
+    fullExtent,
+    listMode,
+    maxScale,
+    minScale,
+    visible,
+  });
+  
+
+  
+  //чтение
+  districtGraphicsLayer.loaded; //bool. указывает загружен ли слой
+  
+
     
-    */
-        
-  })
+})
+
+
+//Отрабатывает при загрузке слоя
+districtGraphicsLayer.on("layerview-create", (ev) => {
+  console.dir(1);
+});
+
+
+//пока не совсем понял. when ждёт когда слой загрузиться и отрабатывает, но пока от этого пользы не вижу
+graphicsLayer.when((layer) => {  });
+
+/*-----------------------------------------------------------------------------------------------------------------------------
+##########-------------<{ Слой текста на полигонах }>-----------#############
+
+*/
+
+let textSymbol = {
+  type: "text", // autocasts as new TextSymbol()
+  text: "You are here",
+  angle: 10, //поворот текста
+  color: "white",
+  backgroundColor: "#000000",
+  borderLineColor: "#000000",
+  borderLineSize: 2,
+  kerning: false, //нужен ли интервал между символами
+  lineHight: 5, //высота между строк
+  lineWidth: 10, //ширина строки
+  rotated: false,
+  verticalAlignment: "",
+  haloSize: "1px", //размер обводки у текста
+  haloColor: "black", //цвет обводки у текста
+
+  xoffset: 3, //смещение по оси
+  yoffset: 3, //смещение по оси
+  font: {
+    // autocasts as new Font()
+    family: "Josefin Slab",
+    size: 12,
+    style: "italic",
+    weight: "bold",
+  },
+};
+
+
+
+
+
 
 /*-------------------------------------------------------------------------------------------------------------
 #######-------<{ Класс FeatureLayer }>---------###########
+  Это тот случай когда нужно взять информацию из какой-т фигуры и вместо того что бы её отображать по нажатию открывая popup
+  можно отображать сразу на карте без popup и как виджет
 */
   let gl = new FeatureLayer();
+
+  	 
+  let feature = new Feature({
+    graphic: pointGraphic3,
+    map,
+    
+   });
+   
+   view.ui.add(feature, "top-left");
 
 /*-------------------------------------------------------------------------------------------------------------
 #######-------<{ Методы Map + Примеры }>---------###########
@@ -452,26 +527,6 @@ map.reorder(graphicsLayer1, 0)
 */
 
 
-
-view.popup.alignment = "bottom-right";/*Если popup не привязан к какой либо стороне путём внесением изменения данных в position, то
-                                        можно отрегулировать его положение относительно элемента на котором вызываем popup*/
-
-
-//только чтение
-view.popup.dockEnabled = true;//по ум. false. закреплён ли popup к границам просмотра
-
-
-
-//не чтение
-view.popup.autoOpenEnabled = false;/*При указании в Graphic свойства popupTemplate будет включен стандартный popup при клике по элементам. Если хотим менять на свой нужно его выключить*/
-view.popup.open({//Можно открывать popup в событиях 
-  title: "Reverse geocode: [" + lon + ", " + lat + "]",
-  location: event.mapPoint, 
-  content: "This is a point of interest" 
-});
-
-
-
 /*
   По ум. popup настроен таким образом при достижении < 544px popup прилипает к низу и это поведение не изменить.
   Можно указать breakpoint для смещения этого поведения и даже указывать position, но в любом случаем < 544 он прилипнет к низу
@@ -481,6 +536,44 @@ view.popup.dockOptions = {
                                             View size < breakpoint  то растягивается на 100% в ширину*/
   buttonEnabled: true, //показать или скрыть кнопку открепляющую popup от границ view
 }
+
+
+
+
+//только чтение
+view.popup.dockEnabled = true; //по ум. false. закреплён ли popup к границам просмотра
+
+//не чтение
+view.popup.autoOpenEnabled = false; /*При указании в Graphic свойства popupTemplate будет включен стандартный popup при клике по элементам. Если хотим менять на свой нужно его выключить*/
+view.popup.collapseEnabled = false; /*Возможность сворачивать popup.(Сверху popup полоска)  */
+view.popup.alignment =
+  "bottom-right"; /*Если popup не привязан к какой либо стороне путём внесением изменения данных в position, то
+                                        можно отрегулировать его положение относительно элемента на котором вызываем popup.
+                                        Можно задать функцию*/
+
+view.popup.dockOptions = {
+  buttonEnabled: true, //показать или скрыть кнопку позволяющую пользователю прикрепить popup к одной из сторон границ карты
+  breakpoint: {
+    width: 544,
+    height: 544,
+  } /*@media max-width: 544. Всё что ниже поведение popup заточено под мобилу
+                                            View size < breakpoint  то растягивается на 100% в ширину*/,
+  /*
+  По ум. popup настроен таким образом при достижении < 544px popup прилипает к низу и это поведение не изменить.
+  Можно указать breakpoint для смещения этого поведения и даже указывать position, но в любом случаем < 544 он прилипнет к низу
+*/
+};
+
+view.popup.actions = {}; //объект для добавления действий на popup панель
+
+//Методы
+view.popup.open({
+  //Можно открывать popup в событиях
+  title: "Reverse geocode",
+  location: event.mapPoint,
+  content: "This is a point of interest",
+});
+
 
 /*-----------------------------------------------------------------------------------------------------------------------------
 ##########-------------<{  Добавление кнопок в popup }>-----------#############
@@ -497,7 +590,185 @@ view.popup.on("trigger-action", function(event){//отрабатывает на 
 
 
 
-
 /*-----------------------------------------------------------------------------------------------------------------------------
 ##########-------------<{ Раздел popupTemplate }>-----------#############
 */
+
+
+
+/*
+  В content: string | [{},{}] | promise | function
+  string - Пишем любую строку даже строку с html элементами
+  [{},{}] -   Массив объектов, каждый из которых содержит как минимум описывающий данные type.
+    type: "fields" - поля которые будут отображаться как строки в таблице
+    fieldInfos = [{},{}] - сопутствующий данному типу массив принимающий описание числовых полей
+
+    type: "media" - будет создан слайдер 
+    mediaInfos
+
+
+
+
+    Не знаю зачем но в док. указано много классов, без которых и так можно взаимодействовать с кодом.
+    Например:
+
+    let textElement = new TextContent();
+    textElement.text = "There are {Point_Count} trees within census block {BLOCKCE10}";
+
+    let template = new PopupTemplate({
+      title: "Заголовок",
+      outFields: ["*"],
+      content: [textElement]
+      //если можно так 
+       content: [
+        {
+          type: 'text',
+          text: "<div class='test1'>Текст</div>"//или new TextContent().text
+        }
+      ]
+    });
+
+*/
+
+popupTemplate: {
+  title: "Какой-то заголовок";
+  content: [
+    {
+      type: "text",
+      text: "<div class='test1'>Текст</div>", //или new TextContent().text
+    },
+
+    {
+      type: "fields", // Будет создана в popup типа таблица строки которой будет отличаться друг от друга
+      fieldInfos: [
+        {
+          fieldName: "Числовые поля",
+          label: "sda", //label приоритетней чем fieldName
+
+          format: {
+            //форматирование для числовых полей
+            places: 0,
+            digitSeparator: false, //ни на что не влияет хотя указана в доках
+          },
+        },
+        {
+          fieldName: "expression/per-asian",
+        },
+      ],
+    },
+    {
+      type: "media", //text, media, fields, attachments, custom
+      mediaInfos: [
+        {
+          title: "<b>Mexican Fan Palm</b>",
+          type: "image", // указание типа данного медиа поля
+          caption: "tree species",
+
+          value: {
+            sourceURL:
+              "https://www.sunset.com/wp-content/uploads/96006df453533f4c982212b8cc7882f5-800x0-c-default.jpg",
+            fields: ["relationships/0/Point_Count_COMMON"],
+            normalizeField: null,
+            tooltipField: "relationships/0/COMMON",
+          },
+        },
+      ],
+    },
+  ];
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*------------------------------------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------------------------
+#######-------<{ Добавление виджетов на карту }>---------###########
+
+  Например переключение на гибрид.
+  Виджеты добавляются на поверхность отображённой карты. 
+  (далее будут фигуры на карте, они закладываются предварительно в карту, и карта закидывается в 2d-3d отображение) 
+  
+*/
+
+const basemapToggle = new eBasemapToggle({//мини виджет миникарт: гибрид, топография
+  view: view, //добавляем карту 2d или 3d карту
+  nextBasemap: "arcgis-imagery"
+});
+
+view.ui.add(basemapToggle, 'bottom-right')//указываем, какой виджет добавить и куда
+
+
+const BasemapGallery = new eBasemapGallery({//виджет со скролом вариантов карт
+  view: view, 
+  source: {
+    query: {
+      title: '"World Basemaps for Developers" AND owner:esri',//это типа какой-то запрос вариантов отображаемых в виджете
+    }
+  }
+});
+
+view.ui.add(BasemapGallery, 'top-right')//указываем, какой виджет добавить и куда
+
+/*------------------------------------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------------------------
+#######-------<{ Создание собственных шаблонов для карты }>---------###########
+
+Есть 2 типа: "векторный слой"(VectorTileLayer) и слой "мозайка"(TileLayer) 
+Создание этих карт происходит в ArcGISOnline, но как пока не понятно.
+После того как карта создана можно получить id и загрузить её
+*/
+  //1й слой основной слой дорог
+  const vectorTileLayer = new eVectorTileLayer({
+    portalItem: {
+      id: "6976148c11bd497d8624206f9ee03e30" 
+    },
+    opacity: .75
+  });
+  //2й слой рельефа 
+  const imageTileLayer = new eTileLayer({
+    portalItem: {
+      id: "1b243539f4514b6ba35e7d995890db1d" 
+    }
+  });
+  //складываем слои на слой рельефа наложен будет слой дорог
+  const basemap = new eBasemap({
+    baseLayers: [ imageTileLayer, vectorTileLayer ]//порядок имеет значение
+  });
+  //инициализируем наш профиль в карте
+  const map = new Map({
+    basemap,
+  });
+  //выводим в 2d карте и настраиваем
+  const view = new eMapView({
+    container: "viewDiv",
+    map: map,
+    center: [-100,40],
+    zoom: 3
+  });

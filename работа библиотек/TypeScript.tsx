@@ -27,6 +27,79 @@ type ID = string | number;//Создали свой шаблонный тип
 const id1: ID = '3123';
 const id2: ID = 1234;
 
+/*
+  Обычно загатавливаеться type на котором в дальнейшем строиться какой-то объект.
+  Например для React т.к. в state может не быть изначально значений, указываем одно из вариантов состояния null(в объекте undefined так же пойдёт)
+*/
+type InitialState = {
+  name: string | null,
+  age: number | null,
+  method?: Function
+}
+
+let ob: InitialState = {
+  name: undefined,
+  age: 29
+} 
+
+/*
+  Но можно создать type на основе готового объекта и экспортировать type для использования где-либо.
+  Т.к. изначально присвоенное значение к какой либо переменной привязываеться к данному типу это поведение можно изменить.
+  К примеру экспортированый type может идеально не подойти к какому либо объекту, к примеру year где-то указываеться как string
+ 
+*/
+let ob1 = {
+  model: 'BMW',
+  year: 2004 as number | string,
+  money: 1200000
+}
+// в ts typeof умеет не просто определять тип, он передаёт ссылку этой переменной с её данными
+export type Model = typeof ob1;
+//где-то в другом файле
+let ob2: Model = {
+  model: 'Opel',
+  year: '2009',
+  money: 1300000
+} 
+
+
+// В reducer описываються константы 
+const GET_USERS = 'app/GET_USERS';
+type InitAction = {
+  type: typeof GET_USERS,//мало того что сказали string, так ещё строка должна соответсвовать
+  id: number,
+}
+
+let action: InitAction = {
+  type: GET_USERS,
+  id: 12
+}
+
+/* Пример 2. ------------------------------------------------------*/
+type InitialStateApp = {
+  users: Array<string>,
+  pages: {
+    actionPage: string
+  }
+}
+
+let stateApp: InitialStateApp = {
+  users: [],
+  pages: {
+    actionPage: 'home'
+  },
+}
+let reducerApp = (state = stateApp, ac: any): InitialStateApp => {
+  return {
+    users: ['Вася'],
+    pages: {
+      actionPage: ''
+    }
+
+  }
+}
+
+
 /*---------------------------------------------------------------------------------------------------------------------
 ##############-------------<{ Интерфейсы }>-------------##############
   Интерфейс похож на определение класса, но создаёт по сути шаблон для свойств с ограничениями по типам.
@@ -56,7 +129,7 @@ const react1: React = {
 // react1.id = 465// нельзя переназначить
 
 const react3 = {} as React; //привязать тип. Новая запись
-const react4 = <React>{}; //старая
+// const react4 = <React>{}; //старая
 
 
 class MyClass implements IReact2{//привязываемся к нужному интерфейсу т.к. хотим заполнять теже свойства
