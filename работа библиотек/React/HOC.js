@@ -198,3 +198,138 @@ export default connect(mapStateToProps, {
 })(Com);
 
 /* 1й вопрос не решить, 2й просто action называть так же как и метод, но отслеживать будет посложней */
+
+/*Реальный пример на практике. Были компоненты с повторяющееся логикой.
+  1я мысль вынести логику в родителя. Это удобно когда дочерний элемент в родителе, но когда дочерний элемент 
+  не конкретный а их нужно как-то менять, то есть несколько выходов.
+
+    a) Прокидывать на верхнем уровне App дочерние элементы в родителя через props.children()
+    b) Прокидывать на верхнем уровне App  только родителя с разными метками и в родителе использовать switch case 
+    c) Закинуть родителя в HOC и обернуть нужные дочерние элементы данным HOC, на верхнем уровне APP вызывать то что вернул HOC
+    
+*/
+
+/*-----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+// Вариант a)
+class PopupContainer extends Component {
+  state = {/*...*/}
+  componentDidMount() {
+    this.props.setActivePopup(this.props.keyName)
+    this.setClassActive(true);
+    this.setState({/*...*/})
+  }
+
+  setClassActive (isActive) {/*...*/}
+  toggleActiveItemSlide = (activeInx) => {/*...*/}
+  controlsCarousel = (e) => {/*...*/}
+ 
+
+  render() {
+    let { controlsCarousel } = this;
+    let { activeInx } = this.state;
+    let { keyName, idSelectors, mainMenuPages,  setOpeningItemInMenu} = this.props;
+    let { titleHeader, isAutoHeader } = mainMenuPages[keyName];
+   return (
+      <div className={`popup menu menu-box-bottom menu-box-bottom-full rounded-0 ${this.state.menuActive ? 'menu-active' : ''}`} style={{}} >
+        <div className='popup__slider' ref={this.state.carouselRef} style={{  }}>
+          <div className="popup__slider-inner">
+            
+            {this.props.children && typeof this.props.children === 'function' 
+              ? this.props.children({activeInx, keyName, controlsCarousel, titleHeader, isAutoHeader, setOpeningItemInMenu, idSelectors})
+              : this.props.children //пропс не будут переданы
+            }
+          </div>
+        </div>
+     </div>
+      
+    );
+  }
+}
+
+
+<>{/*На скобки не смотрим, установил чтоб eslint не ругался*/}
+
+{/* Приходиться на верхнем уровне приложения оборачивать дочерний в родителя. Это не очень читается если кода много*/}
+<PopupContainer keyName='boilerRoom' activePopup={match.isExact} idSelectors={{ boilerRoom: 'boilerRoom-id' }} >
+  { //Делаю так что бы не засорять общий PopupContainer
+    (pop_props) => {
+      return <BoilerRoom {...pop_props} />
+    }
+  }
+</PopupContainer>
+
+<PopupContainer keyName='heatingNetworks' idSelectors={{ heatingNetworks: 'heatingNetworks-id' }} activePopup={match.isExact}  >
+  {
+    (pop_props) => {
+      return <HeatingNetworks {...pop_props} />
+    }
+  }
+</PopupContainer>
+
+
+{/* Можно через  children это получше выглядит */}
+<PopupContainer keyName='boilerRoom' activePopup={match.isExact} idSelectors={{ boilerRoom: 'boilerRoom-id' }} 
+  children={(pop_props) => <BoilerRoom {...pop_props} />} />
+
+<PopupContainer keyName='heatingNetworks' idSelectors={{ heatingNetworks: 'heatingNetworks-id' }} activePopup={match.isExact}  
+  children={(pop_props) => <HeatingNetworks {...pop_props} />} />
+
+</>
+  
+
+/*-----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+// Вариант b. Получается в родителе renderChildren это локальный HOC)
+class PopupContainer extends Component {
+  state = {/*...*/}
+  componentDidMount() {
+    this.props.setActivePopup(this.props.keyName)
+    this.setClassActive(true);
+    this.setState({/*...*/})
+  }
+
+  setClassActive (isActive) {/*...*/}
+  toggleActiveItemSlide = (activeInx) => {/*...*/}
+  controlsCarousel = (e) => {/*...*/}
+ 
+
+  renderChildren = (Children) => {
+    let { controlsCarousel } = this;
+    let { activeInx } = this.state;
+    let { keyName, idSelectors, mainMenuPages,  setOpeningItemInMenu,  children} = this.props;
+    let { titleHeader, isAutoHeader } = mainMenuPages[keyName];
+
+    return (
+      <div className={`popup menu menu-box-bottom menu-box-bottom-full rounded-0 ${this.state.menuActive ? 'menu-active' : ''}`} style={{}} >
+        <div className='popup__slider' ref={this.state.carouselRef} style={{  }}>
+          <div className="popup__slider-inner">
+            <Children {...{children, activeInx, keyName, controlsCarousel, titleHeader, isAutoHeader, setOpeningItemInMenu, idSelectors}} />
+          </div>
+        </div>
+     </div>
+    );
+  }
+
+  render() {
+    /*Единственное придётся добавлять в switch каждого добавленного дочернего компонента. Если бы использовали 3й вариант и из родителя сделали HOC, 
+      то HOC пришлось бы вызывать во всех дочерних элементах */
+    switch (this.props.keyName) {
+      case 'boilerRoom': return this.renderChildren(BoilerRoom)
+      case 'heatingNetworks': return this.renderChildren(HeatingNetworks)
+      case 'buildingsAndStructures': return this.renderChildren(BuildingsAndStructures)
+      case 'gasEquipment': return this.renderChildren(GasEquipment)
+      default:
+       return;
+    } 
+  }
+}
+
+/* Вверху App Вызываем только родителя. */
+<>
+  <PopupContainer keyName='boilerRoom' activePopup={match.isExact} idSelectors={{ boilerRoom: 'boilerRoom-id' }} /> 
+  <PopupContainer keyName='heatingNetworks' idSelectors={{ heatingNetworks: 'heatingNetworks-id' }} activePopup={match.isExact} />   
+</>
+
+
+/*-----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+// Вариант 3  весь родитель оборачиваем в функцию HOC и выносим куда-нибудь в папку HOC и пользуемся где угодно в проекте. 
+
