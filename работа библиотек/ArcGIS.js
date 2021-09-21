@@ -289,7 +289,7 @@ const layer = new FeatureLayer({
  
 
     resizeAlign,//по ум. center. При изменении размера окна, одна из частей всегда стремиться быть в поле зрения. специфичная опция, center не стоит менять на что либо
-    popup: {},//о popup описано ниже
+    popup: {},// popup описано ниже
     rotation,//изначальный поворот карты, если не включён
     
     spatialReference: {//какая-то пространственная привязка к карте
@@ -329,20 +329,43 @@ const layer = new FeatureLayer({
   view.watch('имя_свойства', ()=>{});//принимает имя динамического свойства в view и следит за его возможным изменением 
   /*Динамические свойства:  animation,  widthBreakpoint, */
 
-//настройки показа 3d карты
-  const view = new eSceneView({//на карте появятся доп. значки управления картой 
-    map,
-    container: "viewDiv", 
-    camera: {
-      position: {
-        x: -118.808,
-        y: 33.961, 
-        z: 2000 //высота до карты вместо zoom
-      },
-      tilt: 90//угол наклона камеры на высоте z
-    },
-    
-  });
+  view.ui.add();//ui работает с классами widget. Один из них Feature
+
+  view.focus()
+  view.get('animation')//получить свойство на 1м уровне.
+  view.set('свойство', 'значение')//задать свойство
+  view.destroy()
+  view.hasEventListener('click')//есть ли на данном экземпляре событие click
+  view.hitTest("screenPoint | MouseEvent", {
+    include:  'Слой или Массив слоев графики для включения в hotTest.',
+    exclude: 'Слой или Массив слоев графики, которые нужно исключить из hotTest.'
+  })
+
+  view.toMap()
+  view.toScreen()
+  view.tryFatalErrorRecovery()
+  view.when()
+  view.whenLayerView('один_слой').then(() => {})
+
+  view.takeScreenshot({
+      area: {x: 100, y: 100, height: 70, width: 80},//можно сделать скриншот определённой области
+      format: 'jpg',//по ум. png
+      height: 500,//по ум. высота области. если не указано определяется автоматически
+      width: 500,//по ум. ширина области)
+      ignoreBackground: false,//
+      ignorePadding: false,
+      layers: [],//заснять только определённые слои.(если не указан начальный слой, то снимок будто без фона). Без этого свойства делает полный снимок
+      quality: 70//по ум. 98. качество от 0 - 100
+  })
+  .then((value) => {})
+
+
+
+
+
+
+
+
 
 
 
@@ -397,16 +420,48 @@ view.watch("widthBreakpoint",function(breakpoint){
 
 
 //выполняется когда view полностью загружен
-view.when(
-  (view)=>{
-  //resolve
-  }, 
-  ()=>{}
-)
+view.when( (view)=>{/*resolve*/}, ()=>{/*reject*/} )
 
 
 
 
+
+/*
+  Скорей всего понадобиться именно такой вариант события.
+  hitTest проверяет объект event, и указывает в объекте result объект слоя графики по которому произошёл клик. Без доп. параметра если слои лежат друг на друге, то results пополниться 
+  ими. Что бы отслеживать только нужные слои нужно указать их в options { include: имя-слоя }.  
+  Если указали нижний слой и кликаем по верхнему, нижний слой отработает беспрепятственно. (но и верхний, если на нём не отключен стандартны popup, хоть он и не попадёт в results)
+*/
+
+view.on("click", function(event) {
+  view
+    .hitTest(event, { include: pointTeploGraphicsLayer })
+    .then(({ results }) => {
+      if (results.length) {
+        console.dir(results[0]);
+      }
+    });
+});
+
+
+
+
+view.on("click", function(event) {
+  view.popup.fetchFeatures(event).then(function(response) {
+    response.promisesPerLayerView.forEach(function(fetchResult) {
+      console.dir(fetchResult);
+    });
+  });
+});
+
+
+//Пример скриншота: 
+  view.on('click', ()=>{
+    view.takeScreenshot({ignoreBackground: false}).then(function(screenshot) {
+      let imageElement = document.getElementById("screenshot");
+      imageElement.src = screenshot.dataUrl;
+    });
+  })
 
 
 
@@ -432,6 +487,8 @@ view.when(
 
 
       let pointGraphic = new eGraphic({
+        visible: true,
+        layer: [],
         geometry: { 
           type: "point",//"point",  "polyline", "polygon", "multipoint","extent", "mesh"
           longitude: -118.80657463861,//долгота
@@ -478,6 +535,7 @@ view.when(
 /*ВАЖНО: тут указывается [долгота, широта]. На яндекс карте можем получить данные как отдельной точки,
          так и нарисовать фигуру, но там [широта, долгота] поменяны местами. Можно использовать метод .reverse() или переворачивать в ручную */
       const polygon = new eGraphic({
+
         geometry: {
           type: "polygon",
           rings: [
@@ -896,15 +954,13 @@ popupTemplate: {
 */
 
 const basemapToggle = new eBasemapToggle({//мини виджет миникарт: гибрид, топография
-  view: view, //добавляем карту 2d или 3d карту
+  view, //добавляем карту 2d или 3d карту
   nextBasemap: "arcgis-imagery"
 });
 
-view.ui.add(basemapToggle, 'bottom-right')//указываем, какой виджет добавить и куда
-
 
 const BasemapGallery = new eBasemapGallery({//виджет со скролом вариантов карт
-  view: view, 
+  view, 
   source: {
     query: {
       title: '"World Basemaps for Developers" AND owner:esri',//это типа какой-то запрос вариантов отображаемых в виджете
@@ -912,6 +968,7 @@ const BasemapGallery = new eBasemapGallery({//виджет со скролом �
   }
 });
 
+view.ui.add(basemapToggle, 'bottom-right')//указываем, какой виджет добавить и куда
 view.ui.add(BasemapGallery, 'top-right')//указываем, какой виджет добавить и куда
 
 /*------------------------------------------------------------------------------------------------------------------*/
@@ -956,3 +1013,103 @@ view.ui.add(BasemapGallery, 'top-right')//указываем, какой вид�
   //Предполагаю что берётся среднее значение указанных точек по которым и получаем точку по X Y
 
  
+
+/*-------------------------------------------------------------------------------------------------------------
+#######-------<{ Разбор FeatureLayer + Feature }>---------###########
+
+*/
+  
+  let featLayer = new FeatureLayer({
+    apiKey, blendMode, opacity, id, maxScale, minScale, title, url, visible,
+
+    copyright,
+    customParameters,
+    definitionExpression,
+    displayField,
+    dynamicDataSource,
+    editingEnabled,
+    effect,
+    elevationInfo,
+    featureReduction,
+    fields,
+    floorInfo,
+    formTemplate,
+    fullExtent,
+    gdbVersion,
+    geometryType,
+    hasM,
+    hasZ,
+    historicMoment,			
+    abelingInfo,
+    labelsVisible,
+    layerId,
+    legendEnabled,
+    labelingInfo,
+    listMode,
+    objectIdField,
+    outFields,
+    popupEnabled,
+    popupTemplate,
+    portalItem,
+    refreshInterval,
+    renderer,
+    returnM,
+    returnZ,
+    screenSizePerspectiveEnabled,
+    source,
+    sourceJSON,
+    spatialReference,
+    templates,
+    timeExtent,
+    timeInfo,
+    timeOffset,
+    typeIdField,
+    types,
+    useViewTime,
+  
+  })
+
+
+  let feature = new Feature({
+    view, map, //привязать можно как к карте так и к view
+    container,
+    defaultPopupTemplateEnabled,
+    graphic,
+    headingLevel,
+    id,
+    label,
+    spatialReference,
+    viewModel,
+    visible,
+    visibleElements
+  });
+
+  view.ui.add(feature, "top-left");
+
+
+
+
+
+/*-------------------------------------------------------------------------------------------------------------
+###########-------<{ Раздел 3d SceneView }>---------###########
+  настройки показа 3d карты
+*/
+
+
+
+
+const view = new eSceneView({//на карте появятся доп. значки управления картой 
+  map,
+  container: "viewDiv", 
+  camera: {
+    position: {
+      x: -118.808,
+      y: 33.961, 
+      z: 2000 //высота до карты вместо zoom
+    },
+    tilt: 90//угол наклона камеры на высоте z
+  },
+  
+});
+
+
