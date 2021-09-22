@@ -117,3 +117,27 @@
 	document.body.getBoundingClientRect().left
 
  "#####-------------------------------------------------------------------------------#####"
+
+
+/*#########------------<{ Описание способности прерывания http запроса }>---------######### 
+	Иногда требуется предотвратить загрузку файла, то есть обмен данными с сервером. Существует понятие прервать сигнал.
+	В некоторых методах в options увидим принимающий параметр {signal? }
+*/
+
+let controller = new AbortController();
+
+let downloadBtn = document.querySelector('.download');
+let abortBtn = document.querySelector('.abort');
+
+downloadBtn.addEventListener('click', () => {
+	fetch(url, {signal: controller.signal})//задали сигнал для сигнал
+	.then((response) => {})
+	.catch((e) => {	reports.textContent = 'Download error: ' + e.message;	})
+});
+
+abortBtn.addEventListener('click', () => {
+  controller.abort();//прерывание сигнала
+  console.log('Загрузка прервана');
+});
+
+
