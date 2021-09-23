@@ -967,10 +967,47 @@ view.popup.on("trigger-action", function(event){//отрабатывает на 
 /*-----------------------------------------------------------------------------------------------------------------------------
 ##########-------------<{ Раздел popupTemplate и его контент }>-----------#############
   Классы типов контента: TextContent | MediaContent | FieldsContent | AttachmentsContent | CustomContent
-  Промежуточные класс: ExpressionInfo
 
+  Промежуточные класс: 
+    ExpressionInfo. Для него существует определённый синтаксис Arcade. (Его конечно плотно разбирать не буду т.к. выглядит мягко говоря не очень)
+    FieldInfo - определяет, в каких случаях не участвует или нет PopupTemplate.    Так же содержит данный синтаксис и доп параметры
   Классы присваиваются к свойству popupTemplate и наполняются контентом.
 */
+//Посмотрели и ЗАБЫЛИ
+popupTemplate: {
+  content: "{expression/percent-unemployed}",
+  expressionInfos: [
+    {
+     name: "percent-unemployed",
+     title: "Percent unemployed",
+     /*
+      Везде где видим свойство expression, значит принимает этот код с закосом под js, строчного вида со своей глобальной переменной $feature.
+      Как проверять работу этого кода я не представляю. Удобство нулевое.
+     */
+     expression: `
+      var unemploymentRate = ( $feature.UNEMP_CY / $feature.LABOR_FORCE ) * 100;
+      var population = $feature.POP_16UP;
+      var populationNotWorking = ( ( $feature.UNEMP_CY + $feature.NOT_LABORFORCE_16 ) / $feature.POP_16UP ) * 100;
+      // returns a string built using an Arcade template literal
+      return \`\${$feature.COUNTY} County
+      - Unemployment rate: \${Text(unemploymentRate, "##.#")}%
+      - % population not working: \${Text(populationNotWorking, "##.#")}%
+      - Population: \${Text(population, "#,###")}\`
+     `
+    }
+  ]
+}
+//Для понимания где тут ExpressionInfo. Кстате наследует класс "esri.core.JSONSupport" - на всякий
+popupTemplate: new ExpressionInfo({title: 'tet', expression: '',name: '', returnType: ''});//присмотревшись понятно что тут за что отвечает
+
+/*Немного о FieldInfo. Примеров нет нафига он нужен.*/
+new FieldInfo({fieldName,format,isEditable,label,statisticType,stringFieldOption,tooltip,visible})
+
+
+
+
+
+/*>>-----{{ TextContent }}----------> */
 
 
 
@@ -1057,7 +1094,10 @@ popupTemplate: {
 
 
 
-
+/*>>-----{{ AttachmentsContent }}----------> 
+  Доступен только если используется FeatureLayer и включён 
+    FeatureLayer.capabilities.data.supportsAttachment = true. При чём объект capabilities только для чтения, а как включить это никто не знает.
+*/
 
 
 
@@ -1273,7 +1313,12 @@ const view = new eSceneView({//на карте появятся доп. знач
 
 
 
-
+/*###########-------<{ Arcade синтаксис }>--------##########
+  Он может выполнять математические вычисления и оценивать логические утверждения.
+  Специально разработан для создания пользовательских визуализаций, всплывающих окон и меток выражений
+  Имеет геометрические операции которые позволяют рассчитывать площади и длины
+*/
+$feature //глобальная переменная доступна для функций в FeatureLayer
 
 
 
