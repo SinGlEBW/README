@@ -358,6 +358,8 @@ const layer = new FeatureLayer({
   view.resolution//показывает размер одного пикселя в пространстве карты. Бесполезное свойство
   view.type//показывает какого типа используем экземпляр '2d'(MapView) | '3d'(SceneView)
   view.interacting //меняется если происходит взаимодействие с картой
+  view.updating //меняется если происходит обновление на карте. Если отслеживать свойства через watch, interacting чем то похоже 
+
 //доступ только через экземпляр
   view.input.gamepad.enabledFocusMode = "none";//хз. что-то для геймпада
 
