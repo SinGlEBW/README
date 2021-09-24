@@ -343,6 +343,7 @@ const layer = new FeatureLayer({
       components: ["attribution"]//хз
     },
     layerViews,
+    //свойство вряд ли пригодится
     navigation: {
       gamepad: {
         enabled: false //отключить навигацию по карте на геймпаде
@@ -773,7 +774,6 @@ pointGraphic.getEffectivePopupTemplate()//возвращает экземпля�
     screenSizePerspectiveEnabled: true, // значки размещённые на карте при увеличении и уменьшении правильно располагаются относительно карты
     graphics: [graphicA],
   
-    elevationInfo,
     fullExtent,
     listMode,
     maxScale,
