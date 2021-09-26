@@ -1,0 +1,35 @@
+*, *::after, *::before{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html, body{
+  background-color: #16171D !important;
+}
+.wrap-chat {
+  display: flex;
+  width: 80%;
+  padding: 50px 100px;
+  justify-content: center;
+  flex-direction: column;
+}
+.send-chat{
+  display: flex;
+}
+.send-chat__message {
+  resize: vertical;
+  flex-grow: 1;
+}
+.send-chat__btn{
+
+}
+.view-response {
+  padding: 20px 20px;
+}
+.view-response__item-msg{
+  color: darkturquoise;
+  margin: 10px 0px;
+  padding: 20px 20px;
+  border: 2px solid dodgerblue;
+  border-radius: 1px 7px 1px 7px;
+}
