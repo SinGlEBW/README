@@ -10,59 +10,98 @@
 /*1й. Виды устройства. 3 аргумента обязательны */
 
 
-audio: {
-  optional: [{
-    sourceId: audioSource
-  }]
-}
-video: {
-  optional: [{
-    sourceId: videoSource
-  }]
-}
+/*
+  1. Некоторые девайсы могут иметь один и тот же id: 'default' поэтому их нет в track девайсов.
+    (Например микрофон наушников не показывает, а микрофон web камеры определяет) 
+*/
+
+/*ПОЛЕЗНЫЕ МЕТОДЫ */
+navigator.mediaDevices.getSupportedConstraints()//список того что поддерживает браузер для передачи данных. это не всегда нужно
+navigator.mediaDevices.enumerateDevices()//<-Promise. возвращающего список, имеющихся на машине устройств, в то время как getUserMedia не все.
 
 
 
-window.navigator.getUserMedia({audio: true, video: true}, success, error);//старый вариант
+/*##########-----------<{ Получение видеосигнала }>-----------###########*/
+
+window.navigator.getUserMedia({audio: true, video: true}, success, error);//старый вариант, лучше не использовать
 
 //есть тот же метод, но работающий через промис
-navigator.mediaDevices.getUserMedia({ video: true })//новый вариант. имеет подсказки
+navigator.mediaDevices.getUserMedia(constraints);//<-Promise<MediaStream>; новый вариант. имеет подсказки
+/* Настройки задаются для того что бы браузер поискал у клиента девайс удовлетворяющий этим настройкам. 
+   Девайсов одного типа может быть несколько и не один нас может не устроить, тогда подключения не будет, браузер даже не покажет 
+   клиенту popup "Разрешить", "Запретить"  */
+constraints = {//(ограничения) запрашиваемых девайсов. (audio, video)
+  video: bool || {//MediaTrackConstraints
+    advanced: [{//каких характеристик запрашиваем девайс. Считается расширенным ограничением т.к. варианты перечисляем в массиве. 
+      /*
+        У браузера есть свои жёсткие ограничения, но тут можем задать просьбу для него, найти подходящее устройство. 
+        Просьба рассмотрена будет если задана в пределах браузерных ограничениях. Браузер попробует найти самое близкое соответствие.
+        */
+      aspectRatio: number || {exact: number, ideal: number, max: number, min: number},
+      channelCount: number || {exact: number, ideal: number, max: number, min: number},
+      deviceId: string || [string] || {exact: string || [string], ideal: string || [string]},//id или [id] устройств которые рассматриваем
+      echoCancellation: [bool] || {exact: bool, ideal: bool},
+      facingMode: string || [string] || {exact: string || [string], ideal: string || [string]},
+      frameRate: number || {exact: number, ideal: number, max: number, min: number},
+      groupId: string || [string] || {exact: string || [string], ideal: string || [string]},
+      height:  number || {exact: number, ideal: number, max: number, min: number},
+      latency: number || {exact: number, ideal: number, max: number, min: number},
+      sampleRate: number || {exact: number, ideal: number, max: number, min: number},
+      sampleSize: number || {exact: number, ideal: number, max: number, min: number},
+      suppressLocalAudioPlayback: bool || {exact: bool, ideal: bool},
+      width:  number || {exact: number, ideal: number, max: number, min: number},
+    }],
+  //здесь задаются текущие настройки девайса, которые будут отображаться в getSettings
+    aspectRatio: 1,
+    channelCount,
+    deviceId,
+    echoCancellation,
+    facingMode,
+    frameRate,
+    groupId,
+    height,
+    latency,
+    sampleRate,
+    sampleSize,
+    suppressLocalAudioPlayback,
+    width
+    
+    
+  
+  }
+}
 
-navigator.mediaDevices.getSupportedConstraints()//список того что поддерживает браузер для передачи данных. это не всегда нужно
-navigator.mediaDevices.enumerateDevices()//можно не использовать т.к. getUserMedia имеет информацию
+//для 
+
+
 .then(mediaStream => {});
 
 
-function success(pLocalMediaStream) {
-    /* обработка видеопотока */
 
-    {
-      active: true
-      id: "YZBqjmBSTojq74hFP15W7khMn3oAtXljUPVe"//id медиа потока
-      onactive: null
-      onaddtrack: null
-      oninactive: null
-      onremovetrack: null
-   
-      addTrack: addTrack()
-      clone: clone()
-      getAudioTracks: getAudioTracks()
-      getTrackById: getTrackById()
-      getTracks: getTracks()
-      getVideoTracks: getVideoTracks()
-      removeTrack: removeTrack()
+/* Основной объект обработки devises */
+mediaStream
+{
+  active: true
+  id: "YZBqjmBSTojq74hFP15W7khMn3oAtXljUPVe"//id медиа потока
+  onactive: null
+  onaddtrack: null
+  oninactive: null
+  onremovetrack: null
 
-    }
-}
-
-function error(pError) {
-    /* вывод ошибки */
-    console.log(pError);
+  addTrack: addTrack()
+  clone: clone()
+  getVideoTracks: getVideoTracks()
+  getAudioTracks: getAudioTracks()
+  getTrackById: getTrackById()
+  getTracks: getTracks()//массив audio video девайсов
+  removeTrack: removeTrack()
 }
 
 
 
-/*###########------------<{ Методы Video }>------------###########
+
+
+/*###########------------<{ Получение Video девайсов }>------------###########
   Вызвав getVideoTracks() - получаем массив, объектов MediaStreamTrack, устройств:
 */
 getVideoTracks()
@@ -76,12 +115,13 @@ getVideoTracks()
   muted: false,
   readyState: "live",
   //методы
-  applyConstraints:  applyConstraints(),
+  applyConstraints:  applyConstraints({}),/*<-Promise. опции getUserMedia можно указать тут или дополнить но передав прошлые опции 
+                                          applyConstraints({...getConstraints, aspectRatio: 1.5}). Тогда изменение getSettings будут в then данного промиса.
+                                          Лучше использовать опции  getUserMedia и не плодить промис в промисе*/
   clone:  clone(),
-  getCapabilities:  getCapabilities(),//получить информацию о мин. и мак. значениях которые можно менять в настройках устройства через applyConstraints.
-  getConstraints:  getConstraints(),/*получить возможную ограничивающую информацию User-Agent 
-                                     (то есть: Браузера или бота или любой другой программы с выходом в интернет) , если есть.не поддерживает FireFox */
-  getSettings:  getSettings(),//текущие настройки
+  getCapabilities:  getCapabilities(),//получить инфо. об ограничении нашего девайса самим браузером. Указывается в max и min значениях.
+  getConstraints:  getConstraints(),/*получить инфо. установленных нами ограничений и настроек на девайс. (всё что указывали в getUserMedia для девайса) */
+  getSettings:  getSettings(),//текущие настройки, установленные в getUserMedia или auto
   stop: stop(),
   //события
   onended: null,
@@ -112,8 +152,9 @@ getCapabilities()
 }
 
 
-applyConstraints({
-  height: {min: 480, ideal: 640}
+applyConstraints({ height: {min: 480, ideal: 640}})
+.then(() => {
+  getSettings();
 })
 
 getSettings()
@@ -135,4 +176,87 @@ getSettings()
   whiteBalanceMode: "continuous"//режим баланса белого
 }
 
+
+/*#########---------<{ Связь 2х клиентов и более }>----------#########
+  Что бы получилось связать клиентов нужно знать их публичные(внешние) ip адреса. Эти адреса в основном
+  не статичные, а динамические. Есть технология STUN(протокол) который позволяет узнать свой внешний ip адрес и другие метаданные.
+  Это внешний сервис, к которому каждый клиент будет обращаться на STUN - SERVER который и подскажет каждому клиенту его информацию. 
+
+  После того как каждый клиент имеет всю необходимую информацию которая потребуется для стыковки клиентов, нам нужно обмениваться данными. 
+  Мы выбираем технологию через которую хотим видео-потоком ещё и video потоком. Это скорей будет web socket.
+*/
+
+let pc = new RTCPeerConnection(pcOptions);//предоставляет возможность соединить 2 и более устройства, между локальным и удаленным партнером
+pcOptions = {
+  bundlePolicy: 'balance' || 'max-compat' || 'max-bundle',//определяет как подключить клиентов если у удалённого клиента не поддерживает bundle стандарт
+  certificates: [],//передача возможных каких-то сертификатов
+  iceCandidatePoolSize,//depricate
+  iceServers: [{//принимает массив информации о STUN и TURN серверах для стабильного подключения клиентов
+    urls: 'stun: stun4.l.google.com:19302',
+    credential: {},
+    credentialType,
+    username
+  }],
+  iceTransportPolicy: 'all' || 'relay',
+  rtcpMuxPolicy: 'require'//depricate
+}
+
+
+/*После настройки RTCPeerConnection можно отправлять видеопоток через экземпляр pc */
+//События
+onaddstream: null
+onconnectionstatechange: null
+ondatachannel: undefined
+onicecandidate: null
+onicecandidateerror: null
+oniceconnectionstatechange: null
+onicegatheringstatechange: null
+onnegotiationneeded: null
+onremovestream: null
+onsignalingstatechange: null
+ontrack: null
+
+//методы pc
+pc.setLocalDescription(metaDataConnect),/*регистрируем передачу видео потока, который провоцирует событие onIceCandidate*/
+pc.createDataChannel(),
+pc.setRemoteDescription()//
+
+pc.addIceCandidate(),
+pc.addStream(),
+pc.addTrack(),
+pc.addTransceiver(),
+pc.close(),
+pc.createAnswer(),
+
+pc.createOffer(),
+pc.generateCertificate(),
+pc.getConfiguration(),
+pc.getIdentityAssertion(),
+pc.getReceivers(),
+pc.getSenders(),
+pc.getStats(),
+pc.getStreamById(),
+pc.getTransceivers(),
+pc.removeStream(),
+pc.removeTrack(),
+pc.restartIce(),
+pc.setConfiguration(),
+pc.setIdentityProvider(),
+
+
+
+/* Принцип работы. Оба клиента создают подключение к STUN серверу (заданный в pcOptions) и получают нужную информацию */
+let pc = new RTCPeerConnection(pcOptions);
+/* Далее т.к. код отрабатывает один нам нужно контролировать кто будет 1м инициатором соединения, кто 2й и т.д.
+  1. Инициатор должен создать "Предложение"(createOffer) указывая что хотим получить видео и аудио.
+     После создания нужных мета-данных мы должны их зарегистрировать в setLocalDescription что спровоцирует событие onicecandidate
+     
+*/
+
+let socket = new WebSocket("ws://localhost:4000");
+console.dir(socket);
+
+  pc.createOffer({offerToReceiveVideo: true, offerToReceiveAudio: true}).then((offerMetaData)=>{
+    setLocalDescription(offerMetaData)
+  })
 

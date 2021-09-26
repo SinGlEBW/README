@@ -8,9 +8,13 @@
   <title>Document</title>
 </head>
 <body>
+  <button id="btn-video-start">Старт</button>
+  <button id="btn-video-stop">Стоп</button>
+  <img id='picture' src="#" alt="picture">
+  <video id="viewWebRTC" playsinline autoplay muted webkit-playsinline></video>
+  <audio id="audioWebRTC" playsinline autoplay muted webkit-playsinline></audio>
 
-  <video playsinline autoplay muted webkit-playsinline></video>
-
-  <script src="./index.js" module ></script>
+  <script src="https://webrtc.github.io/adapter/adapter-latest.js" ></script>
+  <script src="./index.js" ></script>
 </body>
 </html>
