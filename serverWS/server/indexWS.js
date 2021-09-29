@@ -2,24 +2,21 @@
 
 const express = require("express");
 const ws = require("ws");
-const cors = require("cors");
+
 let PORT = 4000;
-const wss = new ws.Server({port: PORT}, () => {
+const wss = new ws.Server({port: PORT }, () => {
   console.dir('WS Server Started in port: ' + PORT);
 });
 
 wss.on('connection', (ws) => {
-
   //отрабатывает на новый коннект и присваиваем слушатель сообщений
+  console.dir(wss);
   ws.on('message', (message) =>  {
-    // console.dir(message.toString());
-    
-    /*
-      отправка не одному подключённому в данный момент клиенту, а всем клиентам подключённым к ws.
-      Т.к. мы можем получить всех законекченых клиентов, мы можем присваивать им id и коннектить 
-      определённые id друг с другом, разделив таким образом на комнаты
-    */
+   
+ 
+   //Отправить всем
     wss.clients.forEach((client) => {
+       
       client.send(JSON.stringify({...JSON.parse(message)}))
 
       // if(client.id === id){
@@ -47,3 +44,9 @@ wss.on('connection', (ws) => {
 //   server,
 //   verifyClient,
 // });
+
+  /*
+    отправка не одному подключённому в данный момент клиенту, а всем клиентам подключённым к ws.
+    Т.к. мы можем получить всех законекченых клиентов, мы можем присваивать им id и коннектить 
+    определённые id друг с другом, разделив таким образом на комнаты
+  */
