@@ -1,23 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Created Testing Variant Connected Chat</title>
   <link rel="stylesheet" href="./assets/css/style.css">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 </head>
+
 <body>
-  <div class="wrap-chat">
+  <!-- <div class="wrap-chat">
     <form id="send-chat" class="send-chat">
       <textarea class="send-chat__message textarea form-control"  id="floatingTextarea" name="message" ></textarea>
       <button class="send-chat__btn btn btn-info" type="submit">Отправить</button>
     </form>
     <div class="view-response"></div>
-  </div>
-  
+  </div> -->
 
-  <script src="./assets/js/longPulling.js"></script>
+  <div class="container-fluid">
+
+    <div class="wrap-video">
+      <video id="localVideo" playsinline autoplay muted></video>
+      <video id="remoteVideo" playsinline autoplay muted></video>
+    </div>
+    <div class="wrap-call">
+      <div class="box-call">
+        <div class="toggle-call call">Call</div>
+        <div class="toggle-call stop">Stop</div>
+      </div>  
+    </div>
+
+   
+   
+      <div class="form-switch">
+          
+        <div class="button r" id="button-8">
+          <input type="checkbox" class="checkbox">
+          <div class="knobs">
+            <span></span>
+          </div>
+          <div class="layer"></div>
+        </div>
+
+
+      </div>
+      
+      <!-- <a href="https://www.youtube.com/channel/UC7hSS_eujjZOEQrjsda76gA/videos" target="_blank" id="ytd-url">My YouTube Channel</a> -->
+   
+  </div>
+
+
+
+
+  <!-- <script src="./assets/js/longPulling.js"></script> -->
+  <!-- <script src="./assets/js/clientWebSocket.js"></script> -->
 </body>
+
 </html>

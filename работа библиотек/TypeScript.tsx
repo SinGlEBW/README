@@ -1,3 +1,5 @@
+/*eslint-disable */
+import React, { FC } from 'react';
 /*
   1. Для того что бы работать с TS требуется установить пакет: npm i typescript, он компилирует в js.
 */
@@ -115,6 +117,7 @@ interface React {
     height: number
   }
 }
+
 interface IReact2 extends React{ //Есть наследование. Часто вначале ставят I указывая что это интерфейс
   method2?: () => number //новая запись. С function как записывать не знаю.
 }
@@ -171,3 +174,84 @@ enum SocialMedia {
 }
 //если в enum свойствам присвоены значения, то при обращении через них будем получать не индекс а значения 
 const props3 = SocialMedia.VK;//
+
+
+/*#########---------<{ Примеры на React }>---------########## 
+  props просто без объявления не покатит. Хотя бы any должен быть 
+*/
+
+const Carts = (props:any) => {}
+// Продвинутая вариация
+interface CartsInterface {
+  width: string,
+  height: string,
+  method1?: () => void,
+  children?: React.ReactNode | React.ReactElement | React.ReactChild//ts заставит определить это свойство, используем мы children или нет 
+}
+
+const Carts1 = ({height, method1, width, ...props}: CartsInterface) => {
+  return (
+    <div>
+      {props.children}
+  </div>)
+} //уже авто-комплит будет подсказывать тут и при использовании компонента  <Carts1 />   
+
+// Можно сразу переменной указать что это функциональная компонента и через <> указать interface на который ссылается компонента
+const Carts3: React.FunctionComponent<CartsInterface> = ({height, method1, width}) => {
+  return (<div></div>)//
+} // Есть короткая запись
+FC
+//import React, { FC } from 'react';
+const Carts4:FC<CartsInterface> = ({height, method1, width}) => {
+  return (<div></div>)//
+} // Есть короткая запись
+
+
+
+/*########----------<{ Варианты динамического подгона свойства пользователю компонента }>-------#########*/
+export enum CartVariant {
+  primary = '#123465',
+  darkGray = '#555555'
+}
+
+interface CartsInterface {
+  children?: React.ReactNode | React.ReactElement | React.ReactChild
+  cartVariant: CartVariant,
+}
+
+const Cart5:FC<CartsInterface> = ({ cartVariant }) => {
+  return (
+    <div>
+      <div style={{height: 100, width: 100, background: cartVariant}}></div>
+    </div>
+  );
+};
+
+/*Странно в этом то, что если данное свойство обязательно и построено через
+  enum, то придётся импортировать данный вариант и прокидывать его свойства. 
+  Подменив эти значения какого-нибудь созданного объекта не выйдет, я пробовал */
+<Cart5 cartVariant={CartVariant.primary}></Cart5>
+
+/*Обычная картинка когда interface описывает данные которые так же описываются другим interface */
+interface Ob {
+  name: string,
+  age: number,
+  address: IAddress
+}
+interface IAddress {
+  strict: string
+}
+let ob: Ob[] = [{
+  name: 'Вася',
+  age: 20,
+  address: {
+    strict: 'Москва',
+  }
+},{
+  name: 'Петя',
+  age: 20,
+  address: {
+    strict: 'Краснодар',
+  }
+},
+]

@@ -8,11 +8,14 @@
   <title>Document</title>
 </head>
 <body>
-  <button id="btn-video-start">Старт</button>
-  <button id="btn-video-stop">Стоп</button>
-  <img id='picture' src="#" alt="picture">
-  <video id="viewWebRTC" playsinline autoplay muted webkit-playsinline></video>
-  <audio id="audioWebRTC" playsinline autoplay muted webkit-playsinline></audio>
+
+  <button id="btn-video-call">Звонок</button>
+  <button id="btn-video-stopCall">Завершить </button>
+  <div class="container">
+    <video id="localVideo" playsinline autoplay muted></video>
+    <video id="remoteVideo" playsinline autoplay muted></video>
+  </div>
+
 
   <script src="https://webrtc.github.io/adapter/adapter-latest.js" ></script>
   <script src="./index.js" ></script>

@@ -1,8 +1,13 @@
+
+@import './component/switch.css';
+@import './component/call.css';
 *, *::after, *::before{
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
+*:focus{
+  outline: none;
+}
+
 html, body{
   background-color: #16171D !important;
 }
@@ -33,3 +38,18 @@ html, body{
   border: 2px solid dodgerblue;
   border-radius: 1px 7px 1px 7px;
 }
+/*-----------------------------------------------------------------------------*/
+
+.container-fluid {
+  border: 1px solid #000;
+  height: 100vh;
+  overflow: hidden;
+}
+.wrap-video {
+  border: 1px solid #000;
+}
+.control-call {
+  border: 1px solid blueviolet;
+  display: flex;
+}
+
