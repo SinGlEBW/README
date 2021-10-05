@@ -8,12 +8,15 @@
   <title>Document</title>
 </head>
 <body>
-
-  <button id="btn-video-call">Звонок</button>
-  <button id="btn-video-stopCall">Завершить </button>
   <div class="container">
-    <video id="localVideo" playsinline autoplay muted></video>
-    <video id="remoteVideo" playsinline autoplay muted></video>
+
+    <!-- <img id='picture' src="#" alt="picture"> -->
+    <video id="localWebRTC" autoplay muted ></video>
+    <video id="remoteWebRTC" autoplay muted ></video>
+
+    <button id="btn-video-start">Старт</button>
+    <button id="btn-video-stop">Стоп</button>
+    <button id="btn-video-call">Звонок</button>
   </div>
 
 

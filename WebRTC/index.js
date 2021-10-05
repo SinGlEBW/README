@@ -1,186 +1,182 @@
 addEventListener('DOMContentLoaded', () => {
-  let elVideo = document.getElementById('viewWebRTC');
-  let elAudio = document.getElementById('audioWebRTC');
-  let elImg = document.getElementById('picture');
+
+  let localVideo = document.getElementById('localWebRTC');
+  let remoteVideo = document.getElementById('remoteWebRTC');
+  let btnStart = document.getElementById("btn-video-start");
+  let btnStop = document.getElementById("btn-video-stop");
+  let callButton = document.getElementById('btn-video-call')
+
 //возможные ограничения
   let constraints = {
     video: {advanced:[{height: 150}], height: 300, width: 300},
     audio: true
+  };
+
+  let iceServers = [{
+      urls: "turn:bot.ruitb.ru:5349?transport=tcp",
+      username: "telemed1",
+      credential: "Lomwe675Df",
+      credentialType: "password"
+    },
+    { urls: "stun:stun.stunprotocol.org" },
+    {
+      urls: "turn:bot.ruitb.ru:5349",
+      username: "telemed1",
+      credential: "Lomwe675Df",
+      credentialType: "password",
+    },{
+      urls: "turn:bot.ruitb.ru:3478",
+      username: "telemed1",
+      credential: "Lomwe675Df",
+      credentialType: "password",
+    },{
+      urls: "stun:bot.ruitb.ru:3478",
+      username: "telemed1",
+      credential: "Lomwe675Df",
+      credentialType: "password",
+    }
+  ];
+
+  let videoClose;
+  btnStart.addEventListener("click", videoStart, false);
+  btnStop.addEventListener('click', ()=>{ (typeof videoClose === 'function') && videoClose(); })
+
+/*------------------------------------------------------------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------------------------------------------------------------------*/
+  
+  async function videoStart() {
+
+    let mediaStream = await navigator.mediaDevices.getUserMedia({video: {brightness: 200,height: 500}});
+ 
+    let videoTracks = mediaStream.getVideoTracks()[0];
+    videoClose = function(){ videoTracks.stop(); }
+    localVideo.srcObject = mediaStream;
+
+    createConnectP2P();
   }
 
-  document.getElementById("btn-video-start").addEventListener("click", () => {
-    videoStart();
-  }, false);
+
+  function createConnectP2P() {
+
+    let peerConnection = new RTCPeerConnection({ iceServers, iceTransportPolicy: 'relay'});
+    let dataChanel = peerConnection.createDataChannel('testChanel');
+   
+   
+
+    /*#########----------<{ Event Chanel }>---------###########*/
+    //Открывается соединение после обмена offer, answer  
+    
+    dataChanel.addEventListener('open', (e) => {
+      console.dir('Канал открыт');
+    });
+
+    dataChanel.addEventListener('message', (e) => {
+      console.log('Message: ', e.data);
+    });
 
 
-  let clientPeerId = uuid4(); 
+    peerConnection.addEventListener('datachannel', (e) => {
+      console.dir('Передача канала');
+    })
+    
+    /*#########----------<{ Event peerConnection }>---------###########
+      icecandidate - отрабатывает если вызвали createOffer и передали данные в 
+                     peerConnection.setLocalDescription(offerMetaData)
+    */
 
-  let videoStart = () => {
-    navigator.mediaDevices.getUserMedia({video: {brightness: 200,height: 500}})
-    .then(async (mediaStream) => {
-  
-      // let videoTrack = mediaStream.getVideoTracks()[0];
-      // let audioTrack = mediaStream.getAudioTracks()[0];
-      
-       mediaStream.onactive = () => {
-        console.dir(1);
-      }
+    
+                  
 
+    createWebSocketConnect(peerConnection);
+  }
 
-      let audioTracks = mediaStream.getAudioTracks();
-      let videoTracks = mediaStream.getVideoTracks()[0];
-      elVideo.srcObject = mediaStream;
+/*------------------------------------------------------------------------------------------------------------------------------------------*/
 
+  function createWebSocketConnect(peerConnection){
 
-
-
-      let peerConnection = new RTCPeerConnection({
-        iceServers: [{
-            urls: "turn:bot.ruitb.ru:5349?transport=tcp",
-            username: "telemed1",
-            credential: "Lomwe675Df",
-            credentialType: "password",
-          },
-          {
-            urls: "stun:stun.stunprotocol.org",
-          },
-          {
-            urls: "turn:bot.ruitb.ru:5349",
-            username: "telemed1",
-            credential: "Lomwe675Df",
-            credentialType: "password",
-          },
-          {
-            urls: "turn:bot.ruitb.ru:3478",
-            username: "telemed1",
-            credential: "Lomwe675Df",
-            credentialType: "password",
-          },
-          {
-            urls: "stun:bot.ruitb.ru:3478",
-            username: "telemed1",
-            credential: "Lomwe675Df",
-            credentialType: "password",
-          }],
-        iceTransportPolicy: 'relay',
-      });
-
-      let dataChanel = peerConnection.createDataChannel('testChanel');
-
-
-
-      /*#########----------<{ Event Chanel }>---------###########*/
-
-      dataChanel.addEventListener('open', (e) => {
-        console.dir(e);
-      });
-
-      dataChanel.addEventListener('message', (e) => {
-        console.dir(e);
-      });
-
-
-      
-      /*#########----------<{ Event peerConnection }>---------###########
-        icecandidate - отрабатывает если вызвали createOffer и передали данные в 
-                       peerConnection.setLocalDescription(offerMetaData)
-      */
+    let socket = new WebSocket("ws://localhost:4000");
+    socket.addEventListener('close', (e) => { console.log('Соединение с сервером WS разорвано'); });
+    socket.addEventListener('error', (e) => { console.log('Ошибка соединения с сервером WS разорвано'); });
+    socket.addEventListener('open',  (e) => {
+      console.log('Соединение с сервером WS установленно'); 
+      let clientId = uuid4();     // caller - вызывающий, callee - вызываемый
+   
+      console.log(clientId, 'clientId');
+      const sendWS = (payload) => { socket.send(JSON.stringify(payload)) }
+      sendWS({ type: 'peer', clientId });
 
       peerConnection.addEventListener('icecandidate', (e) => {
-        console.dir(e);
-      })
-
-      /*--------------------------------------------------------------------------------------------*/
-
-      // try {
-
-      //   let offerMetaData =  await peerConnection.createOffer();
-      //   peerConnection.setLocalDescription(offerMetaData)
+        // let { caller, callee } = e.target.clientID;
+        (e.candidate) && sendWS({ type: 'candidate', candidate: e.candidate });
         
-
-      //   console.dir(offerMetaData);
-      //   console.dir(peerConnection);
-
-      // } catch (error) {
-      //   console.dir(error);
-      // }
-    
-    
-    
-
-
-
-
-      let socket = new WebSocket("ws://localhost:4000");
-      socket.addEventListener('close', (e) => { console.log('Соединение с сервером WS разорвано'); });
-      socket.addEventListener('error', (e) => { console.log('Ошибка соединения с сервером WS разорвано'); });
-      socket.addEventListener('open', async (e) => { console.log('Соединение с сервером WS установленно');
-
-        try {
-          let offerMetaData = await peerConnection.createOffer({offerToReceiveAudio: true, offerToReceiveVideo: true});
-          peerConnection.setLocalDescription(offerMetaData)
-          .then(() => {
-            let { sdp, type } = offerMetaData;
-            socket.send(JSON.stringify({type, sdp, targetId: clientPeerId}))
-          });
-        } catch (error) {
-          
-        }
-         
-
-       
-   
-        socket.addEventListener('message', (e) => {
-          //Ответ с сервера 
-            
-            let data = JSON.parse(e.data);
-            if(data.type === 'offer' && data.targetId !== clientPeerId ){
-              console.log('targetId:', data.targetId);
-              console.log('clientPeerId', clientPeerId);
-
-              peerConnection.setRemoteDescription(data);
-              peerConnection.createAnswer()
-              .then((answerMetaData) => {
-                let { type, sdp } = answerMetaData;
-                let answerData = { type, sdp, targetId: clientPeerId };
-                peerConnection.setLocalDescription(answerData)
-                .then(() => {
-                  socket.send(JSON.stringify(answerData))
-                });
-              })
-              
-            }else if(data.type === 'answer' && data.targetId !== clientPeerId){
-              console.dir(data);
-            }
-            //  console.dir(data);
-           
-            // 
-        })
-      
-
-
-     
-     
-  
-
-   
-      
-
-    
-      //методы peerConnection
-     
-      
-
-      
       })
+
+
+      socket.addEventListener('message', async ({data, ...e}) => {
+        data = JSON.parse(data);
+
+        switch (data.type) {
+          case 'peer': (data.clientId !== clientId) && sendWS({type: 'initID', caller: clientId, callee: data.clientId }); break;
+          case 'initID': (data.caller === clientId) && createOffer(peerConnection, sendWS, data); break;          
+          case 'candidate': peerConnection.addIceCandidate(data.candidate); break;      
+          case 'offer': (data.callee === clientId) && createAnswer(peerConnection, sendWS, data); break;
+          case 'answer': (data.caller === clientId) && peerConnection.setRemoteDescription(data); break;
+          default: break;
+        }
+
+      })
+
     })
+
   }
 
-    
-  videoStart();
+
  
 
+  const createOffer = async (peerC, sendWS, { caller, callee }) => {
+    peerC.clientID = { caller, callee };
+    let { type, sdp } = await peerC.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
+
+    await peerC.setLocalDescription({ type, sdp }) 
+    sendWS({ type, sdp, caller, callee });
+  }
+
+  const createAnswer = async (peerC, sendWS, { caller, callee, ...dataPeer }) => {
+    peerC.clientID = { caller, callee };
+    await peerC.setRemoteDescription(dataPeer);
+    let { type, sdp } = await peerC.createAnswer();
+    await peerC.setLocalDescription({ type, sdp }) 
+    sendWS({ type, sdp, caller, callee });
+  }
+
+ 
+
+/*
+     peerConnection.setLocalDescription(offerMetaData)
+      .then(() => {
+        let { sdp, type } = offerMetaData;
+        socket.send(JSON.stringify({type, sdp, targetId: clientId}))
+      });
+    
+*/
+
+
+
+
+
 })
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
   Blob можно превратить в URL такого вида:
