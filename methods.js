@@ -350,3 +350,4 @@ function maxMin({ name, value }){//передаём this element из DOM
 
 err.constructor === Error  // true
 
+

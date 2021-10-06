@@ -1,6 +1,8 @@
 
-/*Браузеры, поддерживающие WebRTC, имеют функцию getUserMedia, для получения данных с устройств audio, video пользователя.
-
+/*Браузеры, поддерживающие WebRTC, имеют 3 основных API
+    getUserMedia - для получения данных с устройств audio, video пользователя.
+    RTCPeerConnection - для передачи audio, video потока в реальном времени(передача видео аудио с вэб камер)  
+    createDataChannel - после соединения аудио видео потока можно обмениваться по доп каналу любыми данными(текст, файлы) 
   Изначально WebRTC рассчитан на соединения типа точка-точка и peer-to-peer.
   Сейчас существует несколько готовых реализаций WebRTC-серверов, организующих сложные 
   групповые конференции между разными браузерами.
@@ -181,6 +183,7 @@ getSettings()
   Что бы получилось связать клиентов нужно знать их публичные(внешние) ip адреса. Эти адреса в основном
   не статичные, а динамические. Есть технология STUN(протокол) который позволяет узнать свой внешний ip адрес и другие метаданные.
   Это внешний сервис, к которому каждый клиент будет обращаться на STUN - SERVER который и подскажет каждому клиенту его информацию. 
+  Так же указывают TURN - server (прокси сервер). Это запасной вариант если у  RTCPeerConnection не получается обойти NAT и соединить компы.
 
   После того как каждый клиент имеет всю необходимую информацию которая потребуется для стыковки клиентов, нам нужно обмениваться данными. 
   Мы выбираем технологию через которую хотим видео-потоком ещё и video потоком. Это скорей будет web socket.
@@ -196,6 +199,11 @@ pcOptions = {
     credential: {},
     credentialType,
     username
+  },{
+    urls: "turn:bot.ruitb.ru:5349?transport=tcp",
+    username: "telemed1",
+    credential: "Lomwe675Df",
+    credentialType: "password",
   }],
   iceTransportPolicy: 'all' || 'relay',
   rtcpMuxPolicy: 'require'//depricate
@@ -206,8 +214,8 @@ pcOptions = {
 //События
 onaddstream: null
 onconnectionstatechange: null
-ondatachannel: undefined
-onicecandidate: null
+ondatachannel: undefined //отрабатывает когда создаётся канал p2p
+onicecandidate: null //реагирует когда создаётся запрос и ответ
 onicecandidateerror: null
 oniceconnectionstatechange: null
 onicegatheringstatechange: null
@@ -217,18 +225,19 @@ onsignalingstatechange: null
 ontrack: null
 
 //методы pc
-pc.setLocalDescription(metaDataConnect),/*регистрируем передачу видео потока, который провоцирует событие onIceCandidate*/
 pc.createDataChannel(),
-pc.setRemoteDescription()//
 
-pc.addIceCandidate(),
+pc.setLocalDescription(metaDataConnect),/*регистрируем передачу видео потока, который провоцирует событие onIceCandidate*/
+pc.setRemoteDescription()//
+pc.createOffer(),//создать description запроса
+pc.createAnswer(),//создать description ответа
+
+pc.addIceCandidate(),//добавление кандидатов при их обмене
 pc.addStream(),
 pc.addTrack(),
 pc.addTransceiver(),
 pc.close(),
-pc.createAnswer(),
 
-pc.createOffer(),
 pc.generateCertificate(),
 pc.getConfiguration(),
 pc.getIdentityAssertion(),
@@ -241,7 +250,7 @@ pc.removeStream(),
 pc.removeTrack(),
 pc.restartIce(),
 pc.setConfiguration(),
-pc.setIdentityProvider(),
+pc.setIdentityProvider()
 
 
 

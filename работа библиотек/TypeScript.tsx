@@ -1,4 +1,3 @@
-//import React, { FC } from 'react';
 /*
   1. Для того что бы работать с TS требуется установить пакет: npm i typescript, он компилирует в js.
 */
@@ -120,9 +119,23 @@ interface React {
     height: number
   }
 }
+
 interface IReact2 extends React{ //Есть наследование. Часто вначале ставят I указывая что это интерфейс
   method2?: () => number //новая запись. С function как записывать не знаю.
 }
+/*Ни кто не мешает создать пустой Interface и наследовать в него из других */
+
+interface Colorful {
+  color: string;
+}
+interface Circle {
+  radius: number;
+}
+interface ColorfulCircle extends Colorful, Circle {}
+//или объединить через type
+type ColorfulCircle1 = Colorful & Circle;
+
+
 
 const react1: React = {
   id: '1234',
@@ -160,11 +173,7 @@ const css: Style = {
   На нормальный русский это типа массив записанный в другой форме. 
   let Membership = ['One', 'Two', 'Three'], но с одной фишкой
  */
-enum Membership {
-  One, 
-  Two,
-  Three,
-}
+enum Membership { One, Two, Three }
 
 const props1 = Membership[2];//Three. Результат как в обычном массиве
 const props2 = Membership.One;//0 - обратившись по имени получаем индекс.В обычном массиве пришлось бы использовать findIndex()
@@ -294,6 +303,7 @@ interface CardChildrenFunction {
   prop: string,
   test: string
 }
+
 interface ICardProps1 {
   height: string,
   onClick: (event: React.MouseEvent) => void,//можно указать object, но тогда подсказок не будет
@@ -323,7 +333,7 @@ const Card2:FC<ListProps> = ({items}) => {
   )
 }
 /*
-  ещё один вариант. Честно говоря не особо понял зачем такой геморойный подход.
+  ещё один вариант. Честно говоря не особо понял такой подход.
   T - это любой тип, но указывать её тогда нужно везде и к тому же она не работает со стрелочной функцией 
 */
 
@@ -336,22 +346,11 @@ function Card3<T> ({items}: ListProps1<T>) {
   )
 }
 
+
+
+
+
 /*------------------------------------------------------------------------------------------------------*/
-//Переиспользование 
-interface IAddress {
-  strict: string,
-  city: string
-}
-
-interface IUsers {
-  name: string;
-  age: number;
-  address: IAddress;
-}
-
-const Users: FC<IUsers> = ({}) => {
-  return (<div></div>)
-}
 
 
 
@@ -407,6 +406,7 @@ function App() {
 
 /*#########---------<{ Где же проявляет себя type в отличие от interface }>--------########## 
   Как такой вариант реализовать через interface я не придумал, т.к. у interface вложенность а обращаться не выходит
+  type практически похож на interface, но может немного больше.
 */
 type MouseEvent = (e: React.MouseEvent) => void//Кстате обращаем внимание к MouseEvent мы привязали функцию значит и указываем на переменной к которой привяжется функция  
 
@@ -420,6 +420,21 @@ function App1() {
   );
 }
 
+/*
+  Главная особенность type это объединять типы.
+  Иногда требуется придумать какой-нибудь универсальный тип перечисляющий типы. Интерфейс так не может. 
+  Это полезно т.к. перечислять можно и interface
+*/
+
+type myType = object | string | React.MouseEvent 
+
+interface interface1 {
+  test: string
+}
+interface interface2 {
+  test2: boolean
+}
+type allInterface = interface1 & interface2;
 
 /*
     имеем теперь подсказки по Event, это хорошо, плохо тем что только по 1й вложенности но не полноценно по следующим т.к. дальше Event не знает 
@@ -462,3 +477,111 @@ interface IParams {
 //снова же привязали interface для подсказок, но чтоб действительно в id что-то было нужно это получить в данном случае через get строку
 let params = useParams<IParams>()
 console.dir(params);
+/*#########---------<{ Примеры на React }>---------########## 
+  props просто без объявления не покатит. Хотя бы any должен быть 
+*/
+
+const Carts = (props:any) => {}
+// Продвинутая вариация
+interface CartsInterface {
+  width: string,
+  height: string,
+  method1?: () => void,
+  children?: React.ReactNode | React.ReactElement | React.ReactChild//ts заставит определить это свойство, используем мы children или нет 
+}
+
+const Carts1 = ({height, method1, width, ...props}: CartsInterface) => {
+  return (
+    <div>
+      {props.children}
+  </div>)
+} //уже авто-комплит будет подсказывать тут и при использовании компонента  <Carts1 />   
+
+// Можно сразу переменной указать что это функциональная компонента и через <> указать interface на который ссылается компонента
+const Carts3: React.FunctionComponent<CartsInterface> = ({height, method1, width}) => {
+  return (<div></div>)//
+} // Есть короткая запись
+
+//import React, { FC } from 'react';
+const Carts4:FC<CartsInterface> = ({height, method1, width}) => {
+  return (<div></div>)//
+} // Есть короткая запись
+
+
+
+/*########----------<{ Варианты динамического подгона свойства пользователю компонента }>-------#########*/
+export enum CartVariant {
+  primary = '#123465',
+  darkGray = '#555555'
+}
+
+interface CartsInterface1 {
+  children?: React.ReactNode | React.ReactElement | React.ReactChild
+  cartVariant: CartVariant,
+}
+
+const Cart5:FC<CartsInterface1> = ({ cartVariant }) => {
+  return (
+    <div>
+      <div style={{height: 100, width: 100, background: cartVariant}}></div>
+    </div>
+  );
+};
+
+/*Странно в этом то, что если данное свойство обязательно и построено через
+  enum, то придётся импортировать данный вариант и прокидывать его свойства. 
+  Подменив эти значения какого-нибудь созданного объекта не выйдет, я пробовал */
+<Cart5 cartVariant={CartVariant.primary}></Cart5>
+
+/*Обычная картинка когда interface описывает данные которые так же описываются другим interface */
+interface Users {
+  name: string,
+  age: number,
+  address: IAddress
+}
+interface IAddress {
+  strict: string
+}
+let ob3: Users[] = [{
+  name: 'Вася',
+  age: 20,
+  address: {
+    strict: 'Москва',
+  }
+},{
+  name: 'Петя',
+  age: 20,
+  address: {
+    strict: 'Краснодар',
+  }
+},
+]
+
+
+
+
+
+/*-------------------------------------------------------------------------------------------------------- */
+/*-------------------------------------------------------------------------------------------------------- */
+/*-------------------------------------------------------------------------------------------------------- */
+
+/*###########------------<{ Универсальность Типов }>-----------###########
+  Создаём функцию с универсальными типами. Будет подсказывать в зависимости от переданных типов.
+*/
+
+function mergeObject<T, R>(a: T, b: R): T & R{
+  return Object.assign({}, a, b)
+}
+const merged = mergeObject({name: 'Вася'}, {age: 30})
+const merged2 = mergeObject({model: 'BMW'}, {year: 1998})
+
+
+
+/*
+  Обращаясь через любой экземпляр мы получаем подсказку относящуюся к ним, поэтому 
+  использование выдуманных "generic type" <T, R> не привязывается к конкретному
+  типу и из-за это удобно работать. 
+*/
+/*-------------------------------------------------------------------------------------------------------- */
+/*-------------------------------------------------------------------------------------------------------- */
+/*-------------------------------------------------------------------------------------------------------- */

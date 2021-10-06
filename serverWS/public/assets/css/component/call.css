@@ -1,0 +1,49 @@
+.wrap-call {
+  /* -webkit-perspective: 800px; */
+  
+  /* -webkit-transform-style: preserve-3d; */
+  /* perspective: 600px; */
+  /* transform-style: preserve-3d; */
+  height: 50px;
+  width: 50px;
+  perspective: 1000px;
+
+}
+.box-call {
+
+  width: inherit;
+  height: inherit;
+  transform-style: preserve-3d;
+  position: relative;
+  transition: .3s linear;
+}
+.toggle-call {
+   
+  width: inherit;
+  height: inherit;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backface-visibility: hidden; 
+  
+  
+
+  border-radius: 50%;
+  border: 1px solid;
+  background: #fff;
+ 
+ 
+}
+.toggle-call.call{
+  transform: rotateY(0deg);
+}
+.toggle-call.stop{
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: rotateY(180deg);
+}
+.box-call:hover{
+  cursor: pointer;
+  transform: rotateY(180deg);
+}
