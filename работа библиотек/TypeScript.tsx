@@ -52,11 +52,9 @@ let ob: InitialState = {
   К примеру экспортированный type может идеально не подойти к какому либо объекту, к примеру year где-то указывается как string
  
 */
-let ob1 = {
-  model: 'BMW',
-  year: 2004 as number | string,
-  money: 1200000
-}
+
+
+
 // в ts typeof умеет не просто определять тип, он передаёт ссылку этой переменной с её данными
 export type Model = typeof ob1;
 //где-то в другом файле
@@ -71,13 +69,11 @@ let ob2: Model = {
 const GET_USERS = 'app/GET_USERS';
 type InitAction = {
   type: typeof GET_USERS,//мало того что сказали string, так ещё строка должна соответствовать
+  // type: GET_USERS,//не верное. переменная не отдаёт значение
   id: number,
 }
 
-let action: InitAction = {
-  type: GET_USERS,
-  id: 12
-}
+
 
 /* Пример 2. ------------------------------------------------------*/
 type InitialStateApp = {
@@ -111,7 +107,7 @@ let reducerApp = (state = stateApp, ac: any): InitialStateApp => {
   readonly свойство после заполнения нельзя будет переназначить
 */
 
-interface React {
+interface Rect {
   readonly id: string,
   color?: string,
   size?: {
@@ -120,7 +116,18 @@ interface React {
   }
 }
 
+
+let ob1 = {
+  model: 'BMW',
+  year: 2004 as number | string,
+  money: 1200000
+}
+
+const react3 = {} as Rect; //привязать тип. Новая запись
+
+
 interface IReact2 extends React{ //Есть наследование. Часто вначале ставят I указывая что это интерфейс
+  id: string
   method2?: () => number //новая запись. С function как записывать не знаю.
 }
 /*Ни кто не мешает создать пустой Interface и наследовать в него из других */
@@ -146,8 +153,6 @@ const react1: React = {
 }
 // react1.id = 465// нельзя переназначить
 
-const react3 = {} as React; //привязать тип. Новая запись
-// const react4 = <React>{}; //старая
 
 
 class MyClass implements IReact2{//привязываемся к нужному интерфейсу т.к. хотим заполнять те же свойства
@@ -267,8 +272,8 @@ namespace Animal {
   ###########---------<{ Примеры на React TypeScript }>---------###########
   Когда привязываем interface получаем подсказки при инициализации компонента и при вызове
 */
-import React, { FC, useRef, useState } from '../../React-cordova/med-call-typescript/node_modules/@types/react';
-import { useParams } from '../../React-cordova/med-call-typescript/node_modules/@types/react-router';
+import React, { FC, useRef, useState } from 'react';
+import { useParams } from 'react-router';
 
 enum EVariantColor {
   primary = '#123456',
@@ -585,3 +590,30 @@ const merged2 = mergeObject({model: 'BMW'}, {year: 1998})
 /*-------------------------------------------------------------------------------------------------------- */
 /*-------------------------------------------------------------------------------------------------------- */
 /*-------------------------------------------------------------------------------------------------------- */
+
+/*#########---------<{ Функции }>----------############ */
+
+interface myPosition {
+  x: number | undefined;
+  y: number | undefined;
+}
+interface myPositionDefault extends myPosition{
+  default: string
+}
+//потенциально возможные варианты. Такой вариант называется перегрузкой
+function position (): myPosition
+function position (a: number): myPositionDefault
+function position (a: number, b: number): myPosition
+
+//реализация
+function position(a?: number, b?: number){
+  if(!a && !b){
+    return {x: undefined, y: undefined}
+  }
+  if(a && !b){
+    return {x: a, y: undefined, default: a.toString()}
+  }
+  if(a && b){
+    return {x: a, y: b}
+  }
+}
