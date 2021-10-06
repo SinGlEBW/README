@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="assets/css/style.css">
+  <title>Document</title>
+</head>
+<body>
+  
+  
+ 
+
+
+  <div class="container">
+
+    <!-- <img id='picture' src="#" alt="picture"> -->
+
+    <div class="video-wrap">
+      <video class="video video-local" id="localWebRTC" autoplay muted playsinline style="" ></video>
+      <video class="video video-remote" id="remoteWebRTC" autoplay muted playsinline style="" ></video>
+    </div>
+
+
+   <div class="control-video">
+    <button class="btn" id="btn-video-call">Звонок</button>
+    <button class="btn" id="btn-video-stop">Завершить звонок</button>
+    <div>
+      <label class="checkbox-inline">Камера
+        <input type="checkbox" id='isCamera'> 
+      </label>
+    </div>
+  
+ 
+    <select id="select-rtc-chanel">
+      <label for="">Выбрать комнату</label>
+      <option selected value="1">Комната 1</option>
+      <option value="2">Комната 2</option>
+      <option value="3">Комната 3</option>
+    </select>
+   </div>
+   <div class="test-control">
+    <!-- <button class="btn" id="btn-create-peer">CreatePeer</button>
+    <button class="btn" id="btn-video-start">Старт</button>
+    <button class="btn" id="btn-video-start">Старт</button> -->
+    <button class="btn" id="startButton">Start</button>
+    <button class="btn" id="callButton">Call</button>
+    <button class="btn" id="hangupButton">Hand Up</button>
+  </div>
+  </div>
+
+  <script src="https://webrtc.github.io/adapter/adapter-latest.js" ></script>
+
+  <!-- <script src="assets/js/dev/index.js" ></script> -->
+  <script src="assets/js/dev/index.js" ></script>
+</body>
+</html>

@@ -1,14 +1,59 @@
 {
   "name": "webrtc",
-  "version": "1.0.0",
+  "version": "0.0.3",
+  "author": "SinGlEBW",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "devDependencies": {
+    "@babel/core": "^7.12.3",
+    "@babel/plugin-proposal-class-properties": "^7.12.1",
+    "@babel/preset-env": "^7.12.1",
+    "babel-preset-minify": "^0.5.1",
+    "babelify": "^10.0.0",
+    "browser-sync": "^2.26.13",
+    "browserify": "^17.0.0",
+    "del": "^6.0.0",
+    "gulp": "^4.0.2",
+    "gulp-autoprefixer": "^7.0.1",
+    "gulp-clean-css": "^4.3.0",
+    "gulp-group-css-media-queries": "^1.2.2",
+    "gulp-imagemin": "^7.1.0",
+    "gulp-rename": "^2.0.0",
+    "gulp-sass": "^5.0.0",
+    "gulp-sourcemaps": "^3.0.0",
+    "gulp-uglify": "^3.0.2",
+    "gulp-uglify-es": "^2.0.0",
+    "node-sass": "^6.0.1",
+    "pump": "^3.0.0",
+    "uglify-js": "^3.11.5",
+    "vinyl-buffer": "^1.0.1",
+    "vinyl-source-stream": "^2.0.0"
+  },
+  "eslintConfig": {
+    "ignorePatterns": "./Readme"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all",
+      "ie >= 11",
+      "Edge >= 12"
+    ],
+    "development": [
+      "last 2 chrome version",
+      "last 2 firefox version",
+      "last 2 safari version"
+    ]
+  },
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.21.1",
+    "config": "^3.3.3",
+    "dotenv": "^8.2.0",
     "webrtc-adapter": "^8.1.0"
   }
 }

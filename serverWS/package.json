@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "server": "nodemon ./server/indexWS.js"
+    "server": "nodemon --inspect ./server/indexWS.js"
   },
   "author": "",
   "license": "ISC",

@@ -1,0 +1,58 @@
+*::after, *::before, *{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body{
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #21252A;
+}
+.container{
+  border: 1px solid red;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.video-wrap{
+  font-size: 0;
+}
+.video{
+  /* display: block; */
+  border: 1px solid darkorange;
+}
+
+.video-local{
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 30vw;
+  height:40vh;
+  border-radius: 2%;
+}
+
+.video-remote{
+  width: 100vw;
+  height: 90vh;
+  
+}
+
+.control-video{
+  padding: 10px;
+  flex-grow: 1;
+  display: flex;
+
+ 
+  /* align-items: stretch; */
+
+  border: 1px solid darkorchid;
+}
+.control-video :nth-child(1n + 2){
+  margin-left: 10px;
+}
+.control-video :nth-child(1n + 0){
+  width: 150px;
+  border-radius: 6px 6px 6px 6px;
+  border-color: transparent;
+}
