@@ -78,7 +78,7 @@ const forma = ({values, errors, touched, handleChange, handleBlur, handleSubmit,
   getFieldHelpers('login');// возвращает объект методов   
       {
         setError:  setError(value) //Не использовать!! Удалят со временем, лучше найти в props setStatus - это налог.
-        setTouched:  setTouched(value, shouldValidate)//хз. 
+        setTouched:  setTouched(value, shouldValidate)//хз. Можно сказать что поля коснулись
         setValue:  setValue(value, shouldValidate)    
       }               
  
@@ -278,6 +278,7 @@ const forma = ({isSubmitting, ...props}) => { //obFormik
   ) 
 }
 
+
 /*САМЫЙ КОРОТКИЙ ВАРИАНТ*/
 const MyInput1 = ({label, ...props}) => (
   <>
@@ -358,12 +359,6 @@ actionsFormik = {
 
   Запись через HOC withFormik немного измениться наполнив наш основной компонент своим объектом.
 */
-
-
-
-
-
-
 
 
 
