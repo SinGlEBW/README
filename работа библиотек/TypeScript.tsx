@@ -126,7 +126,7 @@ let ob1 = {
 const react3 = {} as Rect; //привязать тип. Новая запись
 
 
-interface IReact2 extends React{ //Есть наследование. Часто вначале ставят I указывая что это интерфейс
+interface IRect2 extends Rect{ //Есть наследование. Часто вначале ставят I указывая что это интерфейс
   id: string
   method2?: () => number //новая запись. С function как записывать не знаю.
 }
@@ -144,7 +144,7 @@ type ColorfulCircle1 = Colorful & Circle;
 
 
 
-const react1: React = {
+const react1: Rect = {
   id: '1234',
   size: {
     width: 4,
@@ -155,7 +155,7 @@ const react1: React = {
 
 
 
-class MyClass implements IReact2{//привязываемся к нужному интерфейсу т.к. хотим заполнять те же свойства
+class MyClass implements IRect2{//привязываемся к нужному интерфейсу т.к. хотим заполнять те же свойства
   id: '151'
 }
 
@@ -173,23 +173,22 @@ const css: Style = {
   marginTop: '10px'
 }
 
-/* 
-  enum это просто названный список содержащий чего либо и названый элемент находиться на своей позиции индекса.
-  На нормальный русский это типа массив записанный в другой форме. 
-  let Membership = ['One', 'Two', 'Three'], но с одной фишкой
- */
-enum Membership { One, Two, Three }
 
-const props1 = Membership[2];//Three. Результат как в обычном массиве
-const props2 = Membership.One;//0 - обратившись по имени получаем индекс.В обычном массиве пришлось бы использовать findIndex()
+/* Как получить поля из interface */
 
-enum SocialMedia {
-  VK = 'VK', 
-  FACEBOOK = 'FACEBOOK',
-  INSTAGRAM = 'INSTAGRAM',
+interface Test1 {
+  id: number,
+  name: string,
+  age: number,
+  address: string,
+  is: boolean
 }
-//если в enum свойствам присвоены значения, то при обращении через них будем получать не индекс а значения 
-const props3 = SocialMedia.VK;//
+
+type KeysAll = keyof Test1;
+let key: KeysAll = 'address' //переменной могу присваивать только из полученных полей.(имеются подсказки)
+//Как получить только нужные поля
+type Key1 =  Exclude<keyof Test1, 'address' | 'is'>//исключаем 2 поля
+type Key2 =  Pick<Test1, 'name' | 'age' | 'id'>//наоборот указываем какие поля получить
 
 
 /*---------------------------------------------------------------------------------------------------------------------
@@ -243,6 +242,26 @@ interface Document {
   createElement(tagName: any): Element;
 }
 
+/*---------------------------------------------------------------------------------------------------------------------
+##############-------------<{ Описание enum }>-------------##############
+
+  enum это просто названный список содержащий чего либо и названый элемент находиться на своей позиции индекса.
+  На нормальный русский это типа массив записанный в другой форме. 
+  let Membership = ['One', 'Two', 'Three'], но с одной фишкой
+*/
+  enum Membership { One, Two, Three }
+
+  const props1 = Membership[2];//Three. Результат как в обычном массиве
+  const props2 = Membership.One;//0 - обратившись по имени получаем индекс.В обычном массиве пришлось бы использовать findIndex()
+  
+  enum SocialMedia {
+    VK = 'VK', 
+    FACEBOOK = 'FACEBOOK',
+    INSTAGRAM = 'INSTAGRAM',
+  }
+  //если в enum свойствам присвоены значения, то при обращении через них будем получать не индекс а значения 
+  const props3 = SocialMedia.VK;//
+  
 
 /*---------------------------------------------------------------------------------------------------------------------
 ##############-------------<{ Объединение namespace }>-------------##############
