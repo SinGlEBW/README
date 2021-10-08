@@ -330,7 +330,8 @@ interface CardChildrenFunction {
 
 interface ICardProps1 {
   height: string,
-  onClick: (event: React.MouseEvent) => void,//можно указать object, но тогда подсказок не будет
+  onClick: (event: React.ChangeEvent) => void,//можно указать object, но тогда подсказок не будет
+  onChange(event: React.ChangeEvent):void //2й вариант записи. Подсказка  будет показывать это как функцию, а не как пропс
   children?: FC<CardChildrenFunction>//показываю что есть короткая запись от FunctionComponent
 }
 //Вариант 2. Немного по другому определим компонент и interface. 
@@ -501,9 +502,50 @@ interface IParams {
 //снова же привязали interface для подсказок, но чтоб действительно в id что-то было нужно это получить в данном случае через get строку
 let params = useParams<IParams>()
 console.dir(params);
+
+
+
+/*-------------------------------------------------------------------------------------------------*/
 /*#########---------<{ Примеры на React }>---------########## 
-  props просто без объявления не покатит. Хотя бы any должен быть 
+  FC - специальный тип из TypeScript, он к тому же сокращённый от FunctionComponent 
+  Некоторые типы принимают дополнительные типы в < >(Как это узнать хз).
+  FC - может применить тип в <Props>. Всё что будет туда переданно компонента будет это проверять 
+  на входе передаваемых компоненте props
 */
+
+//Начнём с того что один из вариантов определения пропс выглядит так: children обязательно определять
+const Home:FC = (props:{
+  name?:string,
+  children?: React.ReactNode,
+  onClick?(e:React.ChangeEvent):void,//показывает в подсказках как положено как функцию
+  onClick1?:(e:React.ChangeEvent) => void
+}) => { return ( <div></div> ) }
+
+//2й способ
+const Component:FC<{name?:string, myMethod:()=>{}}> = ({name, myMethod}) => {
+  return (<div></div>)
+}
+
+//но т.к. это не больно удобно описывать типы таким способом то лучше их вынести в type или interface
+
+interface Props {
+  name?:string,
+  children?: React.ReactNode,
+  onClick?(e:React.ChangeEvent):void,//показывает в подсказках как положено как функцию
+  onClick1?:(e:React.ChangeEvent) => void
+}
+
+const Home1:FC = (props:Props) => { return ( <div></div> ) }
+const Component1:FC<Props> = ({name, myMethod}) => { return (<div></div>) }
+
+
+
+
+
+
+
+
+
 
 const Carts = (props:any) => {}
 // Продвинутая вариация
