@@ -465,6 +465,72 @@ class ParentComponent extends Component {
     
     
 
+/*
+  Пример как нужно передавать через ref компоненту выше без использования родительского state.
+  Сделано это для того чтобы сделать компоненту самодостаточной и выдавать методы управления ею через переданный в неё ref. 
+  Передать можно, но верхняя компонента не обновляется. Изменения  можно вносить сверху, но сверху изменения дочернего 
+  объекта active можно увидеть только в функциях или перерендерить компонент родителя
+*/
+
+
+
+export const Popup = React.forwardRef(({children, title, options}, ref) => {
+  let [active, setActive] = useState({keyName: '', isOpen: false});
+ 
+  const handleClick = (e) => {
+    setActive({keyName: '', isOpen: false})
+  }
+
+  /* Функция соединяет полученный ref через forwardRef с данными которые отравляем в него */
+  useImperativeHandle(ref, () => {
+    return {
+      popup: {
+        active,
+        setActive
+      }
+    }
+  })
+  
+
+  return active.isOpen ? (
+    <div className={`popup menu menu-box-bottom menu-box-bottom-full rounded-0 ${active.isOpen ? 'menu-active' : ''}`} style={{}} >
+      <div className={s.header}>
+        <div className={s.title}>{title}</div>
+        {
+          (options?.elVisible?.close !== false) 
+          && 
+          <div className={s.closeBox} onClick={handleClick}>
+            <i className="fa fa-times" aria-hidden="true"></i>
+          </div>
+        }
+      </div>
+      <div className={s.content}>
+        { children }
+      </div>
+    </div>
+  ) : <div></div>
+})  
+
+
+
+
+class Parent extends Component {
+  state = {
+    refPopupControl: React.createRef()
+  }
+  render () {
+  
+  return (
+    
+    <Popup ref={this.state.refPopupControl}>
+           
+           
+    </Popup>
+  )
+  }
+}
+
+
 
 
 /*----------------------------------------------------------------------------------------------------

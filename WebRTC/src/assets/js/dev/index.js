@@ -308,3 +308,12 @@ function uuid4() {
       r.slice(8, 10).reduce(hex, '-') +
       r.slice(10, 16).reduce(hex, '-');
 }
+
+
+
+
+
+
+
+let pc = new RTCPeerConnection()
+pc.createOffer()

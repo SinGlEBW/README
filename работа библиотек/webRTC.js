@@ -229,10 +229,11 @@ pc.createDataChannel(),
 
 pc.setLocalDescription(metaDataConnect),/*регистрируем передачу видео потока, который провоцирует событие onIceCandidate*/
 pc.setRemoteDescription()//
-pc.createOffer(),//создать description запроса
+pc.createOffer(option) //<- Promise<RTCSessionDescriptionInit> создать description запроса /p c.createOffer(cbSuccess, cbErr, option) устарел
 pc.createAnswer(),//создать description ответа
 
-pc.addIceCandidate(),//добавление кандидатов при их обмене
+pc.addIceCandidate(candidate) || pc.addIceCandidate(candidate, successCallback, failureCallback),//добавление кандидатов при их обмене
+
 pc.addStream(),
 pc.addTrack(),
 pc.addTransceiver(),

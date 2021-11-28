@@ -85,23 +85,25 @@ const layer = new FeatureLayer({
     ])=> {
 
       eCfg.apiKey = 'токен';//для использования пакета выдают токен в личном кабинете arcgis
-      /* СЛОИ ЭТО ЭТО ОБЕЩАНИЯ.
+      /* СЛОИ ЭТО ОБЕЩАНИЯ.
         1. Все слои добавляются на карту, а карта отрисовывается в желаемом формате используя 2d(класс MapView) или 3d(SceneView).
-        2. К опциям классов есть взможность обращаться через экземпляр. 
+        2. К опциям классов есть возможность обращаться через экземпляр. 
         3. Есть как минимум 5 стандартный способов добавить как слои на карту так и в слои графику.
           (Ни кто не мешает выходить на данные свойства и методы через другие экземпляры и под тем же соусом взаимодействовать с ними. ) 
-              Классы слоёв: FeatureLayers || WebTileLayers || GraphicsLayers
+              
 
-               a) let instansMap = new Map({layers: экземпляр_слоя})    
+               a) let instansMap = new Map({layers: экземпляр_слоя})//Классы слоёв: GraphicsLayers || FeatureLayers || WebTileLayers   
                b) instansMap.add(экземпляр_слоя)//для динамического добавления слоёв
                с) instansMap.addMany([экземпляр_слоя])//для динамического добавления слоёв
                   
                d) map.layers = [экземпляр_слоя1, экземпляр_сло2] //заглянув в map.layers мы увидим не массив а объект с items, даже после такого добавления
                e) map.layers.push(экземпляр_слоя1, экземпляр_сло2)
-        Для график всё тоже самое только обращение к свойству graphic let instansGraphic = new GraphicsLayers({graphic: экземпляр_graphic})    
+        Для графиков всё тоже самое только обращение к свойству graphic:
+         let instansGraphic = new GraphicsLayers({graphic: экземпляр_graphic})    
 
           Экземпляр view наследует экземпляр map: view.map.layers = [экземпляр_слоя1, экземпляр_сло2]
 
+          В view есть объект graphic в который вроде как можно кидать графику без предварительного помещения графики в слой графики, но...
           ВАЖНО:
             Казалось бы заманчивая идея исключить GraphicsLayers и кидать графику сразу же в view.graphic = [graphic1, graphic2], 
             но загвоздка в том что мы не сможем воспользоваться возможностью предлагаемых опций от new GraphicsLayers({}), я пробовал.
@@ -285,6 +287,7 @@ const layer = new FeatureLayer({
     floors: {},//Содержит набор FloorFilter, а он работает только с виджетами FeatureLayers и SceneLayers. Его задача вроде регулировать zIndex виджетов
     
     highlightOptions: {//подсветка фигуры при наведении 
+      
       color: 'rgba(0,255,255,1)',
       fillOpacity: 0.25,
       haloColor: '#123456',
@@ -293,11 +296,11 @@ const layer = new FeatureLayer({
  
 
     resizeAlign,//по ум. center. При изменении размера окна, одна из частей всегда стремиться быть в поле зрения. специфичная опция, center не стоит менять на что либо
-    popup: {// popup описано ниже
+    popup: {// это общий popup со всеми настройками. В доках это Popup, в не templatePopup. Ещё   описано ниже
       actions,
-      alignment,
+      alignment: 'bottom-right',// положение popup
       autoCloseEnabled,
-      autoOpenEnabled,
+      autoOpenEnabled,//не открывать ни один popup. можем открывать 
       collapseEnabled,
       collapsed,
       ontainer,
@@ -320,9 +323,15 @@ const layer = new FeatureLayer({
       spinnerEnabled,
       title,
       view,
-      viewModel,
+      viewModel: {
+        //...
+        includeDefaultActions: false //отключает по умолчанию кнопку zoom. Её через view.popup.actions = [] не убрать
+      },
       visible,
-      visibleElements
+      visibleElements: {
+        featureNavigation: true,//'элемент навигации на карте. Иногда появляется в popup action со стрелками лева права
+        closeButton: true
+      }
     },
     rotation,//изначальный поворот карты, если не включён
     
@@ -372,12 +381,12 @@ const layer = new FeatureLayer({
 
 
   view.focus()//добавляет рамку сигнализирующую что карта в фокусе(если её не отключили через css)
-  view.get('animation')//получить свойство на 1м уровне.
+  view.get('animation')//получить свойство на 1м уровне. на других уровнях получить можно записывая типа так'layer.id'
   view.set('свойство', 'значение')//задать свойство
   view.destroy()
   view.hasEventListener('click')//есть ли на данном экземпляре событие click
   view.hitTest( {x: 0, y: 0} | "MouseEvent", {
-    include:  'Слой или Массив слоев графики для включения в hotTest.',
+    include:  'Слой или Массив слоев графики для включения в hitTest.',
     exclude: 'Слой или Массив слоев графики, которые нужно исключить из hotTest.'
   })
 
@@ -496,6 +505,7 @@ view.on("click", function(event) {
     .hitTest(event, { include: pointTeploGraphicsLayer, exclude: polygonTeploGraphicsLayer })
     .then(({ results }) => {
       if (results.length) {
+        results[0].graphic.popupTemplate = null//один из способов отключить popup на кликнутой фигуре
         console.dir(results[0]);
       }
     });
@@ -589,12 +599,6 @@ const checkPreloader = (view, keyRenderMap) => (dispatch, getState) => {
   GoToTarget2D = | number[] | Geometry [] | Collection<Geometry> |
   Graphic  [] | Collection<Graphic> | Viewpoint | any;
 
-
-  2й. 
-  animate?: boolean;
-  duration?: number;//milliseconds
-  easing?: 
-  signal?: addEventListener, removeEventListener;//signal для прерывания анимации
 */
 
 let ob = {
@@ -603,7 +607,7 @@ let ob = {
     longitude: -126
   }),
   center: [33.3141, 59.9396],//вместо target
-  zoom: 15,
+  autoOpenEnabled : 15,
   scale: 200000
 }
 //или 
@@ -612,7 +616,7 @@ let optionGoTo = {
   animate: bool,
   duration: 1000,//milliseconds,
   easing: "linear", //"linear" | "ease" | "ease-in" | "ease-out" | "ease-in-out" | Function;
-  // signal: 
+  // signal:  addEventListener, removeEventListener;//signal для прерывания анимации
 }
 view.goTo(ob, optionGoTo)//можно сразу передать всё что указанно в 1м аргументе, но будет без zoom, ...
 
@@ -654,7 +658,19 @@ view.goTo(ob, optionGoTo)//можно сразу передать всё что 
         attributes: {},
         popupTemplate: {
           title: "Заголовок",
-          content: `<p style="height: 200px;">Тестовое описание</p>`
+          content: `<p style="height: 200px;">Тестовое описание</p>`,//content делиться на группы
+          layerOptions: {showNoDataRecords: true, returnTopmostRaster: true},//опции для изображения
+          actions: [{
+            type: '',//:?  button | toggle
+            title: '',//
+            id,
+            image: 'иконка.png',
+            active,
+            className,//класс для css
+            disabled,
+            value,
+            visible
+          }]//
         },
         layer: {},
         visible: true //видимость фигуры
@@ -709,7 +725,9 @@ view.goTo(ob, optionGoTo)//можно сразу передать всё что 
         },
         popupTemplate: {
           title: "{Name}",//string | Function | Promise
-          content: "{Description}"//string | ({graphic}) => {} | Promise<any>;// например можно при клике получить данные с сервака
+          content: "{Description}",//string | ({graphic}) => {} | Promise<any>;// например можно при клике получить данные с сервака
+
+
         }
     
       });
@@ -896,11 +914,13 @@ let textSymbol = {
 /*-------------------------------------------------------------------------------------------------------------
 ###########---------<{ Настройка popup }>---------###########
     
+PopupTemplate находиться у new Graphic и FeatureLayer
   Не загружая модуль "esri/widgets/Popup", можно воспользоваться некоторыми предустановленными настройками.
   Половину свойств не работает хоть и написано что можно что либо передавать. 
 
 
   Есть модуль Popup - с более расширенным функционалом, и PopupTemplate - скромней функционал
+
 */
 
 
@@ -908,12 +928,6 @@ let textSymbol = {
   По ум. popup настроен таким образом при достижении < 544px popup прилипает к низу и это поведение не изменить.
   Можно указать breakpoint для смещения этого поведения и даже указывать position, но в любом случаем < 544 он прилипнет к низу
 */
-view.popup.dockOptions = {
-  breakpoint: { width: 544, height: 544 }, /*@media max-width: 544. Всё что ниже поведение popup заточено под мобилу
-                                            View size < breakpoint  то растягивается на 100% в ширину*/
-  buttonEnabled: true, //показать или скрыть кнопку открепляющую popup от границ view
-}
-
 
 
 
@@ -940,27 +954,52 @@ view.popup.dockOptions = {
 */
 };
 
-view.popup.actions = {}; //объект для добавления действий на popup панель
+view.popup.actions = [{}]; //массив объектов для добавления действий на popup панель
+
 
 //Методы
-view.popup.open({
-  //Можно открывать popup в событиях
-  title: "Reverse geocode",
-  location: event.mapPoint,
-  content: "This is a point of interest",
+/*Можно закрыть все popup и на любой с имеющимся popupTemplate будут открываться общий popup */
+view.popup.autoOpenEnabled = false;
+view.on("click", function(event) {
+  view.popup.open({
+    //Можно открывать popup в событиях
+    title: "Reverse geocode",
+    location: event.mapPoint,
+    content: "This is a point of interest",
+  });
+  
 });
 
 
 /*-----------------------------------------------------------------------------------------------------------------------------
 ##########-------------<{  Добавление кнопок в popup }>-----------#############
+  Разные кнопки в popup можно добавить несколькими способами:
+  Общий popup в view.popup содержит настройки вида попап
 */
+  //1. на popup отдельной фигуры
+  new Graphic({
+    popupTemplate: {
+      //...
+      actions: [{ 
+        type: 'toggle',
+        title: "Measure Length",
+        id: "measure-this",
+        image: "http://batikaf.ibu.edu.tr/images/sampledata/instagram-60.png"
+      }]
+    }
+  })
 
+
+//2. На всех фигурах с действующим popup будет добавлена кнопка в popup 
 view.popup.actions.push({title: 'Кнопки1', id: 'test-id', className: 'my-popup'});//описываем объект на который будем ориентироваться 
 
-view.popup.on("trigger-action", function(event){//отрабатывает на любые кнопки на popup
- 
+//событие на любой popup на любые кнопки на popup
+view.popup.on("trigger-action", function(event){
+  if(event.action.id === "measure-this"){
+    
+  }
   if(event.action.id === "test-id"){
-    test();
+    
   }
 });
 
@@ -1046,27 +1085,36 @@ new FieldInfo({fieldName,format,isEditable,label,statisticType,stringFieldOption
     });
 
 */
-
+/*------------------------------------------------------------------------------------------------------------*/
+/*###########------------<{ Свойства popup }>------------#############*/
 popupTemplate: {
   title: "Какой-то заголовок";
   content: [
+    //возможные типы
     {
       type: "text",
       text: "<div class='test1'>Текст</div>", //или new TextContent().text
     },
 
-    {
-      type: "fields", // Будет создана в popup типа таблица строки которой будет отличаться друг от друга
-      fieldInfos: [
+    {/*
+       Если требуется создать таблицу с 2мя колоннами и только для чисел*/
+      type: "fields", // Autocast as new FieldsContent()
+      fieldInfos: [// Autocast as new FieldInfo[]
         {
-          fieldName: "Числовые поля",
           label: "sda", //label приоритетней чем fieldName
+          fieldName: "Числовые поля",
 
           format: {
             //форматирование для числовых полей
-            places: 0,
-            digitSeparator: false, //ни на что не влияет хотя указана в доках
+            places: 0,//кол-во чисел после точки
+            digitSeparator: false, //разделять числа по 1 000 1 000 000
           },
+
+					isEditable: false,//можно ли редактировать поле
+					statisticType: 'count',//"count"|"sum"|"min"|"max"|"avg"|"stddev"|"var"
+					stringFieldOption: 'text-box',// "rich-text"|"text-area"|"text-box",
+					tooltip: 'подсказка',
+					visible,
         },
         {
           fieldName: "expression/per-asian",
@@ -1091,7 +1139,29 @@ popupTemplate: {
         },
       ],
     },
-  ];
+  ],
+  //опции для изображений
+  layerOptions: {
+    showNoDataRecords: true,
+    returnTopmostRaster: true
+  },
+  
+  outFields: [''],//string[],
+  fieldInfos: [],//ieldInfoProperties[]
+  expressionInfos: [],//popupExpressionInfoProperties[]
+  lastEditInfoEnabled: true,//указывает дату последнего редактирования
+  overwriteActions: false,//запрещать ли действия на карте пока работает popup
+  //вид сортировки
+	relatedRecordsInfo: { 
+    showRelatedRecords: true,
+    orderByFields: [{
+      field: '',//значение пля по которому сортируем. 
+      order: ''//asc | desc от меньше к большему и наоборот
+    }]
+  },
+  returnGeometry: false,//если true то где-то вернёт FeatureSet геометрию
+
+  
 }
 
 
