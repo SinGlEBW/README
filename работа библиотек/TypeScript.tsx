@@ -54,24 +54,100 @@ let ob: InitialState = {
 */
 
 
+/*###########------------<{ Что может typeof }>-------------###########
+  В обычном js typeof поверхностно определяет тип:
+    typeof 12 //'number'
+    typeof {} //'object'
+    typeof {name: 'd'} //'object'
+  
+  В ts typeof может узнавать типы и внутри объектов, так 
+*/
 
-// в ts typeof умеет не просто определять тип, он передаёт ссылку этой переменной с её данными
-export type Model = typeof ob1;
-//где-то в другом файле
-let ob2: Model = {
-  model: 'Opel',
-  year: '2009',
-  money: 1300000
-} 
+  let object1 = {
+    name: 'Вася',
+    family: 'Пупкин',
+    age: 30,
+    address: {
+      city: 'Таганрок'
+    }
+  }
 
+ console.dir(typeof object1)
 
-// В reducer описываются константы 
+/*
+  Можно создать на основе собранной информации type. Получается собираем информацию на основе существующего 
+  объекта и можем применять где либо.*/
+type User = typeof object1;
+
+/*
+  Ещё особенность typeof в том что если переменная примитив и константа (const) то он возвращает её значение а не тип. 
+  Это может пригодиться при использовании его при создании type, interface.
+  Работает он там только с переменными.  (typeof 11, typeof 'sadas' и т.д. не правильно).
+  Если переменная примитив 
+*/
+
 const GET_USERS = 'app/GET_USERS';
 type InitAction = {
-  type: typeof GET_USERS,//мало того что сказали string, так ещё строка должна соответствовать
+  type: typeof GET_USERS,//в свойство type вернулось app/GET_USERS, 
   // type: GET_USERS,//не верное. переменная не отдаёт значение
   id: number,
 }
+
+
+//Ещё примеры
+const initialStateProfile = {
+  posts: [
+    {id: 1, message: 'Hi, how are you?', likeCount: 12},
+    {id: 2, message: 'It\'s, my first post?', likeCount: 11},
+    {id: 3, message: 'BlaBlaBla?', likeCount: 13},
+    {id: 4, message: null, likeCount: null as number | null}
+  ]
+}
+/*
+  Указав as роли не поменяло т.к. на основе предыдущих значений typeScript сделал для себя 
+  выводы что данное свойство или number | null.
+  Автоматическое типизирование это конечно хорошо, но лучше типизировать самому.
+*/
+/*typeScript пытается сам определить тип, и в некоторых моментах это успешно,
+  отругает
+  initialStateProfile.posts[0].id = 'd';
+  initialStateProfile.posts[0].message = 2;
+  initialStateProfile.posts[0].likeCount = 'test';
+*/
+/*такой тип нельзя применить на самом initialStateProfile3, а только на других объектах. */
+export type initialStateProfileType = typeof initialStateProfile;
+
+initialStateProfile.posts[0].message = 2;/* Поэтому он продолжает не ругаться */
+
+//Попробуем самостоятельно типизировать именно этот объект 
+const initialStateProfile2= {
+  posts: [
+    {id: 1, message: 'Hi, how are you?', likeCount: 12},
+    {id: 2, message: 'It\'s, my first post?', likeCount: 11},
+    {id: 3, message: 'BlaBlaBla?', likeCount: 13},
+    {id: 4, message: null, likeCount: null},
+  ] as {id: number, message: string, likeCount: number}[]//можно сказать: Воспринимай этот posts как массив объектов с типами.
+}
+
+initialStateProfile2.posts[0].likeCount = 2// теперь если что-то не так будет ругаться.
+/* Но запись как по мне не очень читаема. Лучше делать так */
+
+
+const initialStateProfile3 = {
+  posts: [
+    {id: 1, message: 'Hi, how are you?', likeCount: 12},
+    {id: 2, message: 'It\'s, my first post?', likeCount: 11},
+    {id: 3, message: 'BlaBlaBla?', likeCount: 13},
+    {id: 4, message: null, likeCount: null as string | null},
+  ]
+} 
+
+
+
+
+
+
+
 
 
 
@@ -174,21 +250,6 @@ const css: Style = {
 }
 
 
-/* Как получить поля из interface */
-
-interface Test1 {
-  id: number,
-  name: string,
-  age: number,
-  address: string,
-  is: boolean
-}
-
-type KeysAll = keyof Test1;
-let key: KeysAll = 'address' //переменной могу присваивать только из полученных полей.(имеются подсказки)
-//Как получить только нужные поля
-type Key1 =  Exclude<keyof Test1, 'address' | 'is'>//исключаем 2 поля
-type Key2 =  Pick<Test1, 'name' | 'age' | 'id'>//наоборот указываем какие поля получить
 
 
 /*---------------------------------------------------------------------------------------------------------------------
@@ -330,8 +391,7 @@ interface CardChildrenFunction {
 
 interface ICardProps1 {
   height: string,
-  onClick: (event: React.ChangeEvent) => void,//можно указать object, но тогда подсказок не будет
-  onChange(event: React.ChangeEvent):void //2й вариант записи. Подсказка  будет показывать это как функцию, а не как пропс
+  onClick: (event: React.MouseEvent) => void,//можно указать object, но тогда подсказок не будет
   children?: FC<CardChildrenFunction>//показываю что есть короткая запись от FunctionComponent
 }
 //Вариант 2. Немного по другому определим компонент и interface. 
@@ -467,8 +527,8 @@ type allInterface = interface1 & interface2;
     если хотим углублённые подсказки круг универсальности сужается.
     Таких подсказок куча в React
      React.DragEvent<HTMLDivElement>
-
-     OptionHTMLAttributes<HTMLOptionElement>  - отвечает за <option атрибуты />
+     React.InputHTMLAttributes<HTMLInputElement>
+     React.ThHTMLAttributes<HTMLTableColElement>  <th> таблицы 
      ...
 */
 type MouseEvent2 = (e: React.MouseEvent<HTMLDivElement>) => void
@@ -504,50 +564,9 @@ interface IParams {
 //снова же привязали interface для подсказок, но чтоб действительно в id что-то было нужно это получить в данном случае через get строку
 let params = useParams<IParams>()
 console.dir(params);
-
-
-
-/*-------------------------------------------------------------------------------------------------*/
 /*#########---------<{ Примеры на React }>---------########## 
-  FC - специальный тип из TypeScript, он к тому же сокращённый от FunctionComponent 
-  Некоторые типы принимают дополнительные типы в < >(Как это узнать хз).
-  FC - может применить тип в <Props>. Всё что будет туда переданно компонента будет это проверять 
-  на входе передаваемых компоненте props
+  props просто без объявления не покатит. Хотя бы any должен быть 
 */
-
-//Начнём с того что один из вариантов определения пропс выглядит так: children обязательно определять
-const Home:FC = (props:{
-  name?:string,
-  children?: React.ReactNode,
-  onClick?(e:React.ChangeEvent):void,//показывает в подсказках как положено как функцию
-  onClick1?:(e:React.ChangeEvent) => void
-}) => { return ( <div></div> ) }
-
-//2й способ
-const Component:FC<{name?:string, myMethod:()=>{}}> = ({name, myMethod}) => {
-  return (<div></div>)
-}
-
-//но т.к. это не больно удобно описывать типы таким способом то лучше их вынести в type или interface
-
-interface Props {
-  name?:string,
-  children?: React.ReactNode,
-  onClick?(e:React.ChangeEvent):void,//показывает в подсказках как положено как функцию
-  onClick1?:(e:React.ChangeEvent) => void
-}
-
-const Home1:FC = (props:Props) => { return ( <div></div> ) }
-const Component1:FC<Props> = ({name, myMethod}) => { return (<div></div>) }
-
-
-
-
-
-
-
-
-
 
 const Carts = (props:any) => {}
 // Продвинутая вариация
@@ -680,3 +699,61 @@ function position(a?: number, b?: number){
     return {x: a, y: b}
   }
 }
+
+
+
+/*#########---------<{ Утилиты TypeScript }>----------############ */
+
+
+//1
+interface I_Test1 {
+  name?: string;
+  age?: number;
+}
+let a:I_Test1 = {age: 18}
+let b:Required<I_Test1> = {age: 20, name: ''}//Если закинуть в Required тип с необязательными полями то они станут обязательными в этом контексте
+
+//2
+type AllKey = 'boilerRoom' | 'tsTP' | 'heatingNetwork';
+
+// let c:{[key: AllKey]: string} = {}   <- Вот так делать нельзя пытаться сказать что ключами в данном объекте будут выступать перечисленные в типе
+let c: Record<AllKey, string> = {boilerRoom: '', tsTP: '', heatingNetwork: ''}//  только как контролировать обязательность данных ключей хз
+
+//3
+
+/* Как получить поля из interface */
+
+interface Test1 {
+  id: number,
+  name: string,
+  age: number,
+  address: string,
+  is: boolean
+}
+
+type KeysAll = keyof Test1; //keyof перечисление ключей интерфейса или перечисляет type X = "A" | "B" | "C". 
+let key: KeysAll = 'address' //переменной могу присваивать только из полученных полей.(имеются подсказки)
+//Как получить только нужные поля
+
+// Exclude
+type Key1 =  Exclude<"A" | "B" | "C", 'C'>//исключаем тип С из набора перечисленных типов создавая новый тип 
+
+type TestType1 = "A" | "B" | "C";
+type Key2 =  Exclude<keyof TestType1, 'C'>//Вот пример создания нового типа с исключенным 'С'
+type Key3 =  Exclude<keyof Test1, 'address' | 'is'>;//или можем исключить ключи из interface
+
+// Extract
+type Key4 =  Extract<keyof Test1, 'car' | 'city'>;//Эта утилита наоборот конкатенирует ключи в новый тип
+
+//
+type Key5 = NonNullable<string | number | undefined >//Создаёт тип исключая null | undefined то есть вернёт string | number
+
+
+
+// type Key4 =  Pick<Test1, 'name' | 'age' | 'id'>//наоборот указываем какие поля получить
+
+//Partial<{}>
+/* Утилита нужна для присваивания переменной какого-то типа, но при этом
+  но в переменную данные могут попасть чуть позже
+*/
+// Partial<BoilerRoom001Type>[]
