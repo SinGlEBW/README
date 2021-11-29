@@ -60,7 +60,7 @@ if(process.env.NODE_ENV){
    require('dotenv').config({ path: path.resolve('env', '.env') });
 }
 
-Можно использовать вместо "dotenv" использовать пакет "config". Он не используем .env файлы, ему требуется
+Можно использовать вместо "dotenv" использовать пакет "config". Он не использует .env файлы, ему требуется
 создать папку с файлами. 
 
   config

@@ -45,12 +45,10 @@ addEventListener('DOMContentLoaded', async () => {
   let stateMediaTrack = true;
 
 
-  // let mediaStream = await navigator.mediaDevices.getUserMedia({video: {brightness: 200,height: 500}, audio: true});
-  // let peerConnection = new RTCPeerConnection({ iceServers, iceTransportPolicy: 'relay'});
-  // let dataChanel = peerConnection.createDataChannel('testChanel');
-  // let socket = new WebSocket("ws://localhost:4000");
-
-
+  let mediaStream = await navigator.mediaDevices.getUserMedia({video: {brightness: 200,height: 500}, audio: true});
+  let peerConnection = new RTCPeerConnection({ iceServers, iceTransportPolicy: 'relay'});
+  let dataChanel = peerConnection.createDataChannel('testChanel');
+  let socket = new WebSocket("ws://localhost:4000");
 
 
 

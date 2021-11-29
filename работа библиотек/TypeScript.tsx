@@ -467,6 +467,8 @@ type allInterface = interface1 & interface2;
     если хотим углублённые подсказки круг универсальности сужается.
     Таких подсказок куча в React
      React.DragEvent<HTMLDivElement>
+
+     OptionHTMLAttributes<HTMLOptionElement>  - отвечает за <option атрибуты />
      ...
 */
 type MouseEvent2 = (e: React.MouseEvent<HTMLDivElement>) => void
