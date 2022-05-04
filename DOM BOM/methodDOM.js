@@ -136,9 +136,9 @@ el.append();//добавляет текст в элемент. Тоже само
 "beforeend - внутрь элемента, в конец";
 "afterend -  после элемента"
 
-el.insertAdjacentElement(InsertPosition,  Element)
-el.insertAdjacentHTML(InsertPosition, htmlString)
-el.insertAdjacentText(InsertPosition, textString)
+el.insertAdjacentElement(InsertPosition,  Element);
+el.insertAdjacentHTML(InsertPosition, htmlString);
+el.insertAdjacentText(InsertPosition, textString);
 
 
 el.getClientRects(); //DOMRectList 

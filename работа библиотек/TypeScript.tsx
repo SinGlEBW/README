@@ -568,6 +568,10 @@ console.dir(params);
   props просто без объявления не покатит. Хотя бы any должен быть 
 */
 
+interface CardProps extends React.HTMLProps<HTMLButtonElement> {
+
+}
+
 const Carts = (props:any) => {}
 // Продвинутая вариация
 interface CartsInterface {
@@ -581,7 +585,7 @@ const Carts1 = ({height, method1, width, ...props}: CartsInterface) => {
   return (
     <div>
       {props.children}
-  </div>)
+    </div>)
 } //уже авто-комплит будет подсказывать тут и при использовании компонента  <Carts1 />   
 
 // Можно сразу переменной указать что это функциональная компонента и через <> указать interface на который ссылается компонента
@@ -734,26 +738,36 @@ interface Test1 {
 type KeysAll = keyof Test1; //keyof перечисление ключей интерфейса или перечисляет type X = "A" | "B" | "C". 
 let key: KeysAll = 'address' //переменной могу присваивать только из полученных полей.(имеются подсказки)
 //Как получить только нужные поля
+//TODO: поправить.
+//утилиты для типов виде перечисления
 
-// Exclude
 type Key1 =  Exclude<"A" | "B" | "C", 'C'>//исключаем тип С из набора перечисленных типов создавая новый тип 
 
 type TestType1 = "A" | "B" | "C";
 type Key2 =  Exclude<keyof TestType1, 'C'>//Вот пример создания нового типа с исключенным 'С'
 type Key3 =  Exclude<keyof Test1, 'address' | 'is'>;//или можем исключить ключи из interface
-
-// Extract
+//
+// Extract - противоположная сторона Exclude
 type Key4 =  Extract<keyof Test1, 'car' | 'city'>;//Эта утилита наоборот конкатенирует ключи в новый тип
 
 //
 type Key5 = NonNullable<string | number | undefined >//Создаёт тип исключая null | undefined то есть вернёт string | number
 
 
+//утилиты для типов виде объектов
 
-// type Key4 =  Pick<Test1, 'name' | 'age' | 'id'>//наоборот указываем какие поля получить
+type Key6 = Pick<Test1, 'name' | 'age' | 'id'>//наоборот указываем какие поля получить если есть. 
+type Key7 = Omit<Test1, 'age' | 'id'>//исключает, ключи. 
+
+
+
 
 //Partial<{}>
 /* Утилита нужна для присваивания переменной какого-то типа, но при этом
   но в переменную данные могут попасть чуть позже
 */
 // Partial<BoilerRoom001Type>[]
+
+
+
+

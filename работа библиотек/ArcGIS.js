@@ -144,7 +144,7 @@ const layer = new FeatureLayer({
       /* Экземпляр map из полезного содержит: 
           только чтение:  */
         initialized: bool //проинициализирована ли карта
-        destroyed: bool//вызыван ли destroy
+        destroyed: bool//вызван ли destroy
         declaredClass: "esri.Map"//указывает что за класс используем. 
         allLayers: {// allTables, editableLayers - содержать те же свойства и методы
         /*Странно то что  allLayers объект, но носледует он (кастомные) методы Array и на нём их можем использовать 
@@ -158,7 +158,7 @@ const layer = new FeatureLayer({
             
             filter((item, inx, )=>{}),//перебирает items, но только наши подклёчённые слои. В items могут быть ещё слои если подлючён готовый basemap
             flatten(()=>{}), map(()=>{})//даже если ничего не возвращать всё равно вернёт объект, просто не изменёный
-            getItemAt(1);//вернуть слой по найденный по inx
+            getItemAt(1);//вернуть слой  по inx
             on()//change, after-add, after-changes, after-remove и для before 
             /* Пример 
                   map.allLayers.on("change", function(event) {
@@ -385,9 +385,9 @@ const layer = new FeatureLayer({
   view.set('свойство', 'значение')//задать свойство
   view.destroy()
   view.hasEventListener('click')//есть ли на данном экземпляре событие click
-  view.hitTest( {x: 0, y: 0} | "MouseEvent", {
+  view.hitTest( screenPoint | "MouseEvent", {
     include:  'Слой или Массив слоев графики для включения в hitTest.',
-    exclude: 'Слой или Массив слоев графики, которые нужно исключить из hotTest.'
+    exclude: 'Слой илtoи Массив слоев графики, которые нужно исключить из hotTest.'
   })
 
   view.toMap({x: 0, y: 0})//как-то преобразует координаты монитора в координаты на карте. Ничего не происходит.

@@ -221,7 +221,7 @@ lazyLoading1.validate({ notThis: 'foo', useThis: 4 })
 
 
 //просто создаёт объект ошибки. В каких случаях пригодиться не понятно. yup сам генерирует ошибки 
-new new yup.ValidationError('Ошибочка', value, 'age')//msg, value, path
+new yup.ValidationError('Ошибочка', value, 'age')//msg, value, path
 
 /*@@Некоторые методы@@*/
 /*####***MixedSchema***#### */
