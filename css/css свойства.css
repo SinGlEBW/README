@@ -160,6 +160,7 @@ body {
 	/*расстояние между строками. Использовать лучше в относительной единице. Если увеличить font-size то и расстояние между строк увеличиться нормально, а не будет статичен  */
 	letter-spacing: 0.25px;	/*расстояние между буквами*/
 	user-select: none;	/*Нельзя выделить текст*/
+	text-decoration-skip-ink: auto;
 	text-transform: uppercase;	/*высота текста*/
 	text-decoration: underline;	/*подчёркнутый, зачёркнутый - декорация над текстом*/
 	text-underline-position: auto; /*управляет положением линии под текстом. на label чёт не прокатило*/
@@ -178,9 +179,11 @@ body {
 	border-radius: 20px;
 	
 	padding: 10px;
-	box-decoration-break: clone;
-	/*даёт возможность оформить каждую строку так же как предыдущую
-																без оборачивания каждой строки в span*/
+	box-decoration-break: clone;/*даёт возможность оформить каждую строку так же как предыдущую
+		без оборачивания каждой строки в TextNode
+		https://developer.mozilla.org/en-US/docs/Web/CSS/box-decoration-break
+	*/
+
 
 
 /*#######---------<{ свойство position: relative, (fixed,absolute), sticky }>--------########*/
@@ -1432,4 +1435,236 @@ div {
 
 	backdrop-filter: blur(10px); /* влияет только на родительский блок */
 
+}
+
+
+
+
+{
+  "name": "app-kit",
+  "version": "0.1.0",
+  "private": true,
+  "homepage": "./",
+  "dependencies": {
+    "@amcharts/amcharts4": "^4.10.20",
+    "@arcgis/core": "^4.20.2",
+    "@babel/core": "7.12.3",
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.8.1",
+    "@mui/icons-material": "^5.8.0",
+    "@mui/lab": "^5.0.0-alpha.82",
+    "@mui/material": "^5.8.0",
+    "@pmmmwh/react-refresh-webpack-plugin": "0.4.3",
+    "@splidejs/react-splide": "^0.4.4",
+    "@svgr/webpack": "5.5.0",
+    "@testing-library/jest-dom": "^5.14.1",
+    "@testing-library/react": "^11.2.7",
+    "@testing-library/user-event": "^12.8.3",
+    "@types/jest": "^27.0.2",
+    "@types/js-cookie": "^3.0.1",
+    "@types/node": "^16.11.1",
+    "@types/react": "^17.0.30",
+    "@types/react-dom": "^17.0.10",
+    "@types/react-router-dom": "^5.3.1",
+    "@types/react-slick": "^0.23.7",
+    "@typescript-eslint/eslint-plugin": "^4.5.0",
+    "@typescript-eslint/parser": "^4.5.0",
+    "axios": "^0.21.1",
+    "babel-eslint": "^10.1.0",
+    "babel-jest": "^26.6.0",
+    "babel-loader": "8.1.0",
+    "babel-plugin-named-asset-import": "^0.3.7",
+    "babel-preset-react-app": "^10.0.0",
+    "bfj": "^7.0.2",
+    "bootstrap": "^5.0.2",
+    "camelcase": "^6.1.0",
+    "case-sensitive-paths-webpack-plugin": "2.3.0",
+    "chart.js": "^3.4.0",
+    "classnames": "^2.3.1",
+    "cordova-sqlite-react": "^1.1.37",
+    "css-loader": "4.3.0",
+    "csstype": "^3.0.9",
+    "dotenv": "8.2.0",
+    "dotenv-expand": "5.1.0",
+    "eslint": "^7.11.0",
+    "eslint-config-react-app": "^6.0.0",
+    "eslint-plugin-flowtype": "^5.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.1.0",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
+    "eslint-plugin-react": "^7.21.5",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "eslint-plugin-testing-library": "^3.9.2",
+    "eslint-webpack-plugin": "^2.5.2",
+    "esri-loader": "^3.1.0",
+    "file-loader": "6.1.1",
+    "formik": "^2.2.9",
+    "framer-motion": "^4.1.17",
+    "fs-extra": "^9.0.1",
+    "html-webpack-plugin": "4.5.0",
+    "identity-obj-proxy": "3.0.0",
+    "jest": "26.6.0",
+    "jest-circus": "26.6.0",
+    "jest-resolve": "26.6.0",
+    "jest-watch-typeahead": "0.6.1",
+    "js-cookie": "^2.2.1",
+    "jsdoc": "^3.6.7",
+    "lodash.memoize": "^4.1.2",
+    "mini-css-extract-plugin": "0.11.3",
+    "node-sass": "^6.0.1",
+    "optimize-css-assets-webpack-plugin": "5.0.4",
+    "pnp-webpack-plugin": "1.6.4",
+    "postcss-flexbugs-fixes": "4.2.1",
+    "postcss-loader": "3.0.0",
+    "postcss-normalize": "8.0.1",
+    "postcss-preset-env": "6.7.0",
+    "postcss-safe-parser": "5.0.2",
+    "prompts": "2.4.0",
+    "prop-types": "^15.7.2",
+    "react": "^17.0.2",
+    "react-app-polyfill": "^2.0.0",
+    "react-bootstrap": "^1.6.1",
+    "react-chartjs-2": "^3.0.3",
+    "react-dev-utils": "^11.0.3",
+    "react-dom": "^17.0.2",
+    "react-redux": "^7.2.4",
+    "react-refresh": "^0.8.3",
+    "react-router-dom": "^5.2.0",
+    "react-slick": "^0.28.1",
+    "react-slide-routes": "^1.1.0",
+    "react-transition-group": "^4.4.2",
+    "redux": "^4.1.0",
+    "redux-thunk": "^2.3.0",
+    "reselect": "^4.1.5",
+    "resolve": "1.18.1",
+    "resolve-url-loader": "^3.1.2",
+    "sass-loader": "^10.0.5",
+    "semver": "7.3.2",
+    "slick-carousel": "^1.8.1",
+    "style-loader": "1.3.0",
+    "swiper": "^7.2.0",
+    "terser-webpack-plugin": "4.2.3",
+    "ts-pnp": "1.2.0",
+    "typescript": "^4.4.4",
+    "universal-cookie": "^4.0.4",
+    "url-loader": "4.1.1",
+    "web-vitals": "^1.1.2",
+    "webpack": "4.44.2",
+    "webpack-dev-server": "3.11.1",
+    "webpack-manifest-plugin": "2.2.0",
+    "workbox-webpack-plugin": "5.1.4",
+    "yup": "^0.32.9"
+  },
+  "scripts": {
+    "start": "node scripts/start.js ",
+    "build": "node scripts/build.js && cordova build",
+    "test": "node scripts/test.js"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "jest": {
+    "roots": [
+      "<rootDir>/src"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx,ts,tsx}",
+      "!src/**/*.d.ts"
+    ],
+    "setupFiles": [
+      "react-app-polyfill/jsdom"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/src/setupTests.js"
+    ],
+    "testMatch": [
+      "<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}",
+      "<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}"
+    ],
+    "testEnvironment": "jsdom",
+    "testRunner": "D:\\WebDev\\HTML\\domains\\devReactjs\\app-kit\\node_modules\\jest-circus\\runner.js",
+    "transform": {
+      "^.+\\.(js|jsx|mjs|cjs|ts|tsx)$": "<rootDir>/config/jest/babelTransform.js",
+      "^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
+      "^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)": "<rootDir>/config/jest/fileTransform.js"
+    },
+    "transformIgnorePatterns": [
+      "[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|cjs|ts|tsx)$",
+      "^.+\\.module\\.(css|sass|scss)$"
+    ],
+    "modulePaths": [],
+    "moduleNameMapper": {
+      "^react-native$": "react-native-web",
+      "^.+\\.module\\.(css|sass|scss)$": "identity-obj-proxy"
+    },
+    "moduleFileExtensions": [
+      "web.js",
+      "js",
+      "web.ts",
+      "ts",
+      "web.tsx",
+      "tsx",
+      "json",
+      "web.jsx",
+      "jsx",
+      "node"
+    ],
+    "watchPlugins": [
+      "jest-watch-typeahead/filename",
+      "jest-watch-typeahead/testname"
+    ],
+    "resetMocks": true
+  },
+  "babel": {
+    "presets": [
+      "react-app"
+    ]
+  },
+  "devDependencies": {
+    "cordova-android": "^10.1.2",
+    "cordova-plugin-advanced-http": "^3.3.1",
+    "cordova-plugin-advanced-http-2": "^1.6.1",
+    "cordova-plugin-device": "^2.0.3",
+    "cordova-plugin-file": "^7.0.0",
+    "cordova-plugin-navigationbar-color": "^0.1.0",
+    "cordova-plugin-network-information": "^3.0.0",
+    "cordova-plugin-splashscreen": "^6.0.1",
+    "cordova-plugin-statusbar": "^3.0.0",
+    "cordova-sqlite-storage": "^6.0.0",
+    "html-to-react-components": "^1.6.6",
+    "sequelize-cli": "^6.2.0",
+    "typescript-plugin-css-modules": "^3.4.0"
+  },
+  "quokka": {
+    "babel": true
+  },
+  "cordova": {
+    "platforms": [],
+    "plugins": {
+      "cordova-plugin-device": {},
+      "cordova-plugin-navigationbar-color": {},
+      "cordova-plugin-advanced-http": {
+        "ANDROIDBLACKLISTSECURESOCKETPROTOCOLS": "SSLv3,TLSv1"
+      },
+      "cordova-plugin-network-information": {},
+      "cordova-plugin-statusbar": {},
+      "cordova-sqlite-storage": {},
+      "cordova-plugin-splashscreen": {}
+    }
+  }
 }

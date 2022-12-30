@@ -146,11 +146,6 @@ const initialStateProfile3 = {
 
 
 
-
-
-
-
-
 /* Пример 2. ------------------------------------------------------*/
 type InitialStateApp = {
   users: Array<string>,
@@ -744,7 +739,7 @@ let key: KeysAll = 'address' //переменной могу присваива�
 type Key1 =  Exclude<"A" | "B" | "C", 'C'>//исключаем тип С из набора перечисленных типов создавая новый тип 
 
 type TestType1 = "A" | "B" | "C";
-type Key2 =  Exclude<keyof TestType1, 'C'>//Вот пример создания нового типа с исключенным 'С'
+type Key2 =  Exclude<TestType1, 'C'>//Вот пример создания нового типа с исключенным 'С'
 type Key3 =  Exclude<keyof Test1, 'address' | 'is'>;//или можем исключить ключи из interface
 //
 // Extract - противоположная сторона Exclude
@@ -760,7 +755,26 @@ type Key6 = Pick<Test1, 'name' | 'age' | 'id'>//наоборот указыва�
 type Key7 = Omit<Test1, 'age' | 'id'>//исключает, ключи. 
 
 
+//Как получить из массива тип с его ключами.
+const arrKeyRequestSystemPTB = [
+  "boilerRoom", "tsTP", "heatingNetworks", "exTechDevices",
+  "buildingsAndStructures", "gasEquipment", "inspCollectorsBoilerRoom",
+  "inspBatteryTanks", "preparationFuelOil", "dataAboutConservation",
+  "dataFuelReserves"
+] as const;
+type keysArr = typeof arrKeyRequestSystemPTB[number]
+//собрать объект на основе ключей. 2й параметр reduce не требует заполнения если указать as
+const idSelectors = arrKeyRequestSystemPTB.reduce((prev, key, inx) => ({...prev, [key]: `${key}2`}), {}) as Record<keysArr, string>;
 
+
+export const RoutesPrivate = {
+  home: { titleHeader: 'АРМ Руководителя',  path: '/' },
+  map: { titleHeader: 'Зоны теплоснабжения', path: '/map' },
+  information: { titleHeader: 'Информация', path: '/information' },
+  settings: { titleHeader: 'Настройки', path: '/settings' } 
+}
+//Вариант получить ключи объекта для type
+export type KeyNameMainPage = keyof typeof RoutesPrivate;
 
 //Partial<{}>
 /* Утилита нужна для присваивания переменной какого-то типа, но при этом
@@ -769,5 +783,189 @@ type Key7 = Omit<Test1, 'age' | 'id'>//исключает, ключи.
 // Partial<BoilerRoom001Type>[]
 
 
+
+
+
+class MainContainer extends Component {
+
+  backInHome = (e) => {
+    e.preventDefault(); 
+    this.props.history.push('/')
+    this.props.closeMenu();
+    this.props.controlNavBar({visible: true})
+    this.props.setActivePage('home'); 
+    this.props.setActivitySlide()
+  }
+
+  handleLogOut = (e) => {
+    e.preventDefault();
+    this.props.logOut()
+    this.props.closeMenu();
+  }
+  render() {
+   
+    let { isDarkTheme, toggleDarkMode, isMenuMain, openingMenu, closeMenu } = this.props;
+    
+
+    return (
+      <CSSTransition in={isMenuMain} timeout={{enter: 30, exit: 320}} unmountOnExit classNames={{
+        // appear: 'my-appear',
+        // appearActive: 'my-active-appear',
+        // appearDone: 'my-done-appear',
+        // enter: 'menu-active',
+        // enterActive: 'menu-active',
+        enterDone: 'menu-active',
+        // exit: 'my-exit',
+        // exitActive: 'my-active-exit',
+        exitDone: '',
+       }}>
+      <div id="menu-main" className={`menu menu-box-left rounded-0 `} 
+           data-menu-width="280" data-menu-active="nav-welcome" style={{zIndex: 110}} >
+        <CardTitle {...{closeMenu}}/>
+      
+
+        <div className="list-group list-custom-small list-menu " style={{}}>
+         
+          <a href="/" onClick={this.backInHome} className="menu-active" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer'}}>
+              <i className="fa fa-home gradient-blue color-white" style={{margin: '0px 0px 0px 6px'}}></i>
+              <span className="ps-3" style={{ flexGrow: 1}}>Главная</span>
+              <i className="fa fa-angle-right"></i>
+          </a>     
+
+          <ListNavigation />
+
+          
+
+          <Settings {...{isDarkTheme, toggleDarkMode, openingMenu}} />
+          
+
+          
+          <a href="/" onClick={this.handleLogOut} className="menu-active" style={
+            { display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer'}}>
+              <i className="fa fa-sign-out-alt gradient-dark color-white"  aria-hidden="true" style={{margin: '0px 0px 0px 6px'}}></i>
+              <span className="ps-3" style={{ flexGrow: 1 }}>Выход</span>
+              
+          </a>   
+
+          {/* <ListGroupContacts /> */}
+          <h6 className="menu-divider font-10 mt-4">©<span className="copyright-year">{year}</span> ГУП «ТЭК СПб» </h6>
+        </div>
+      </div>
+      </CSSTransition>
+    );
+  }
+}
+
+
+
+
+const mapStateToProps = (state) => ({ 
+  isDarkTheme: getDarkModeStatus(state), 
+  isMenuMain: getMenuStatus('isMenuMain', state),
+ 
+})
+
+const mapDispatchToProps = {
+  toggleDarkMode,
+  openingMenu,
+  closeMenu,
+  setActivePage,
+  logOut,
+  controlNavBar,
+  setActivitySlide
+}
+
+export default compose(
+  connect(mapStateToProps, mapDispatchToProps),
+  withRouter
+)(MainContainer);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const appRoot = document.getElementById('app-root');
+const modalRoot = document.getElementById('modal-root');
+
+class Modal extends React.Component {
+  constructor(props) {
+    super(props);
+    this.el = document.createElement('div');
+  }
+
+  componentDidMount() {
+
+    modalRoot.appendChild(this.el);
+  }
+
+  componentWillUnmount() {
+    modalRoot.removeChild(this.el);
+  }
+
+  render() {
+    return ReactDOM.createPortal(
+      this.props.children,
+      this.el
+    );
+  }
+}
+
+class Parent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {clicks: 0};
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  handleClick() {
+    // This will fire when the button in Child is clicked,
+    // updating Parent's state, even though button
+    // is not direct descendant in the DOM.
+    this.setState(state => ({
+      clicks: state.clicks + 1
+    }));
+  }
+
+  render() {
+    return (
+      <div onClick={this.handleClick}>
+        <p>Number of clicks: {this.state.clicks}</p>
+        <p>
+          Open up the browser DevTools
+          to observe that the button
+          is not a child of the div
+          with the onClick handler.
+        </p>
+        <Modal>
+          <Child />
+        </Modal>
+      </div>
+    );
+  }
+}
+
+function Child() {
+  // The click event on this button will bubble up to parent,
+  // because there is no 'onClick' attribute defined
+  return (
+    <div className="modal">
+      <button>Click</button>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(appRoot);
+root.render(<Parent />);
 
 

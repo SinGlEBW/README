@@ -158,3 +158,14 @@ git config --global alias.co checkout
 git config --global alias.ct commit
 git config --global alias.st status
 git config --global alias.br branch
+
+
+https://russianblogs.com/article/91811417392/
+
+Добавление в несколько репозиториев
+git remote add origin https://github.com/SinGlEBW/med-call-react.git 
+
+git remote set-url --add --push "origin" https://github.com/SinGlEBW/med-call-react.git
+git remote set-url --add --push "origin" https://git.ruitb.ru/grigoriy.shlyakhtich/medcall.git
+
+git push origin
