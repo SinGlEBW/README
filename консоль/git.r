@@ -162,10 +162,32 @@ git config --global alias.br branch
 
 https://russianblogs.com/article/91811417392/
 
-Добавление в несколько репозиториев
-git remote add origin https://github.com/SinGlEBW/med-call-react.git 
+1. Создайте ключ ssh и загрузите его в Github / Gitlab.
+    # Укажите имя файла при генерации открытого ключа и секретного ключа, Gitlab использует
+    ssh-keygen -t rsa -f ~/.ssh/id_rsa.gitlab -C "w_zhangguanjun@xx.com.cn"
+    # Создать по умолчанию, Github использует
+    ssh-keygen -t rsa -C "championzhang007@gmail.com"
 
-git remote set-url --add --push "origin" https://github.com/SinGlEBW/med-call-react.git
-git remote set-url --add --push "origin" https://git.ruitb.ru/grigoriy.shlyakhtich/medcall.git
+2. Настройте файл конфигурации. 
+    touch ~/.ssh/config
+    В файле указать
+        Host *intra.xxx.com
+            IdentityFile ~/.ssh/id_rsa.gitlab
+            User zhangguanjun
+3. добавить ключи в git Hub|Lub  -  id_rsa.pub|id_rsa.gitlab
+4. Убедитесь, что все в порядке.
+    ~  ssh -T git@github.com
+    ~  ssh -T git@gitlab.dev
+
+5. Добавить данные пользователя в git config --global и --local с данными user.name и user.email
+    git config --local user.name 'grigoriy.shlyakhtich' && git config --local user.email 'grigoriy.shlyakhtich@ruitb.ru'
+
+
+Добавление в несколько репозиториев
+git remote add origin https://github.com/SinGlEBW/med-call-ivanovo.git 
+git remote set-url --add --push "origin" https://github.com/SinGlEBW/med-call-ivanovo.git
+git remote set-url --add --push "origin" https://git.ruitb.ru/grigoriy.shlyakhtich/med-call-ivanovo.git
 
 git push origin
+
+

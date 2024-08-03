@@ -207,6 +207,7 @@ const lazyLoading1 = yup.lazy((value) => {
     default: return yup.mixed();
   }
 });
+
 /* Скажем если мы совсем в слепую получаем данные, то будем передавать через lazy*/
 lazyLoading1.validate({ notThis: 'foo', useThis: 4 })
 .then(console.dir)

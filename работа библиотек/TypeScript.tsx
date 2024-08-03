@@ -699,8 +699,46 @@ function position(a?: number, b?: number){
   }
 }
 
+/*
+  INFO: extends - Используется не только как наследование в interface, но и как тернарное выражение(об этом позже)
+ 
+*/
+let state = {
+  section1: {
+    list1: [],
+    list2: [],
+    list3: [],
+  },
+  section2: {
+    list4: [],
+    list5: [],
+    list6: [],
+  }
+}
+type Section_OR = 'section1' | 'section2';
+type State = typeof state;
+function setList<S extends Section_OR>(keySection: S, list: keyof State[S] ){};
+//В зависимости от секции выбираем листы.
+setList('section2', 'list4');
+/* Как бы это выглядело на JS*/
+
+function setList1(keySection, list ){
+  let setcion = ['section1', 'section2'];
+  if(setcion.includes(keySection)){
+    list = state[keySection]
+  }
+  console.dir(list);
+};
+
+setList('section2', 'list4');
+//Не верный вариант.
+// function setList2<S extends Section_OR>(keySection: Section_OR, list: keyof State[Section_OR] ){ };
 
 
+
+function setListOb<S extends Section_OR>({keySection, list}: {keySection: S, list: keyof State[S] }){};
+
+setListOb({keySection: 'section2', list: ''})
 /*#########---------<{ Утилиты TypeScript }>----------############ */
 
 
@@ -713,12 +751,25 @@ let a:I_Test1 = {age: 18}
 let b:Required<I_Test1> = {age: 20, name: ''}//Если закинуть в Required тип с необязательными полями то они станут обязательными в этом контексте
 
 //2
-type AllKey = 'boilerRoom' | 'tsTP' | 'heatingNetwork';
+type AllKey_OR = 'boilerRoom' | 'tsTP' | 'heatingNetwork';
 
 // let c:{[key: AllKey]: string} = {}   <- Вот так делать нельзя пытаться сказать что ключами в данном объекте будут выступать перечисленные в типе
-let c: Record<AllKey, string> = {boilerRoom: '', tsTP: '', heatingNetwork: ''}//  только как контролировать обязательность данных ключей хз
 
-//3
+type Data1_P =  Record<AllKey_OR, string>;
+//или
+type Data2_P = {[key in AllKey_OR]:string};//после in должен быть перечисляемый тип. 
+/*
+  Иногда требуется получить ключи какого-то объекта и можно встретить такую конструкцию
+  Пример типизировать данные с сервера.
+*/
+let Ob = {
+  address: 'Франция',
+  section: 'section1',
+}
+
+type HardType = {name: string, id: number}
+type Data3_P = {[key in keyof typeof Ob]: HardType}//typeof - перевели объект в тип, keyof - получили только ключи, in - перечисляем и присваиваем в key
+
 
 /* Как получить поля из interface */
 
@@ -733,7 +784,7 @@ interface Test1 {
 type KeysAll = keyof Test1; //keyof перечисление ключей интерфейса или перечисляет type X = "A" | "B" | "C". 
 let key: KeysAll = 'address' //переменной могу присваивать только из полученных полей.(имеются подсказки)
 //Как получить только нужные поля
-//TODO: поправить.
+
 //утилиты для типов виде перечисления
 
 type Key1 =  Exclude<"A" | "B" | "C", 'C'>//исключаем тип С из набора перечисленных типов создавая новый тип 
@@ -753,6 +804,13 @@ type Key5 = NonNullable<string | number | undefined >//Создаёт тип и�
 
 type Key6 = Pick<Test1, 'name' | 'age' | 'id'>//наоборот указываем какие поля получить если есть. 
 type Key7 = Omit<Test1, 'age' | 'id'>//исключает, ключи. 
+
+
+
+
+
+
+
 
 
 //Как получить из массива тип с его ключами.
@@ -782,190 +840,5 @@ export type KeyNameMainPage = keyof typeof RoutesPrivate;
 */
 // Partial<BoilerRoom001Type>[]
 
-
-
-
-
-class MainContainer extends Component {
-
-  backInHome = (e) => {
-    e.preventDefault(); 
-    this.props.history.push('/')
-    this.props.closeMenu();
-    this.props.controlNavBar({visible: true})
-    this.props.setActivePage('home'); 
-    this.props.setActivitySlide()
-  }
-
-  handleLogOut = (e) => {
-    e.preventDefault();
-    this.props.logOut()
-    this.props.closeMenu();
-  }
-  render() {
-   
-    let { isDarkTheme, toggleDarkMode, isMenuMain, openingMenu, closeMenu } = this.props;
-    
-
-    return (
-      <CSSTransition in={isMenuMain} timeout={{enter: 30, exit: 320}} unmountOnExit classNames={{
-        // appear: 'my-appear',
-        // appearActive: 'my-active-appear',
-        // appearDone: 'my-done-appear',
-        // enter: 'menu-active',
-        // enterActive: 'menu-active',
-        enterDone: 'menu-active',
-        // exit: 'my-exit',
-        // exitActive: 'my-active-exit',
-        exitDone: '',
-       }}>
-      <div id="menu-main" className={`menu menu-box-left rounded-0 `} 
-           data-menu-width="280" data-menu-active="nav-welcome" style={{zIndex: 110}} >
-        <CardTitle {...{closeMenu}}/>
-      
-
-        <div className="list-group list-custom-small list-menu " style={{}}>
-         
-          <a href="/" onClick={this.backInHome} className="menu-active" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer'}}>
-              <i className="fa fa-home gradient-blue color-white" style={{margin: '0px 0px 0px 6px'}}></i>
-              <span className="ps-3" style={{ flexGrow: 1}}>Главная</span>
-              <i className="fa fa-angle-right"></i>
-          </a>     
-
-          <ListNavigation />
-
-          
-
-          <Settings {...{isDarkTheme, toggleDarkMode, openingMenu}} />
-          
-
-          
-          <a href="/" onClick={this.handleLogOut} className="menu-active" style={
-            { display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer'}}>
-              <i className="fa fa-sign-out-alt gradient-dark color-white"  aria-hidden="true" style={{margin: '0px 0px 0px 6px'}}></i>
-              <span className="ps-3" style={{ flexGrow: 1 }}>Выход</span>
-              
-          </a>   
-
-          {/* <ListGroupContacts /> */}
-          <h6 className="menu-divider font-10 mt-4">©<span className="copyright-year">{year}</span> ГУП «ТЭК СПб» </h6>
-        </div>
-      </div>
-      </CSSTransition>
-    );
-  }
-}
-
-
-
-
-const mapStateToProps = (state) => ({ 
-  isDarkTheme: getDarkModeStatus(state), 
-  isMenuMain: getMenuStatus('isMenuMain', state),
- 
-})
-
-const mapDispatchToProps = {
-  toggleDarkMode,
-  openingMenu,
-  closeMenu,
-  setActivePage,
-  logOut,
-  controlNavBar,
-  setActivitySlide
-}
-
-export default compose(
-  connect(mapStateToProps, mapDispatchToProps),
-  withRouter
-)(MainContainer);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const appRoot = document.getElementById('app-root');
-const modalRoot = document.getElementById('modal-root');
-
-class Modal extends React.Component {
-  constructor(props) {
-    super(props);
-    this.el = document.createElement('div');
-  }
-
-  componentDidMount() {
-
-    modalRoot.appendChild(this.el);
-  }
-
-  componentWillUnmount() {
-    modalRoot.removeChild(this.el);
-  }
-
-  render() {
-    return ReactDOM.createPortal(
-      this.props.children,
-      this.el
-    );
-  }
-}
-
-class Parent extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {clicks: 0};
-    this.handleClick = this.handleClick.bind(this);
-  }
-
-  handleClick() {
-    // This will fire when the button in Child is clicked,
-    // updating Parent's state, even though button
-    // is not direct descendant in the DOM.
-    this.setState(state => ({
-      clicks: state.clicks + 1
-    }));
-  }
-
-  render() {
-    return (
-      <div onClick={this.handleClick}>
-        <p>Number of clicks: {this.state.clicks}</p>
-        <p>
-          Open up the browser DevTools
-          to observe that the button
-          is not a child of the div
-          with the onClick handler.
-        </p>
-        <Modal>
-          <Child />
-        </Modal>
-      </div>
-    );
-  }
-}
-
-function Child() {
-  // The click event on this button will bubble up to parent,
-  // because there is no 'onClick' attribute defined
-  return (
-    <div className="modal">
-      <button>Click</button>
-    </div>
-  );
-}
-
-const root = ReactDOM.createRoot(appRoot);
-root.render(<Parent />);
 
 
